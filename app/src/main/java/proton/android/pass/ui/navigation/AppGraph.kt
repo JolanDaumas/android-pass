@@ -18,7 +18,10 @@
 
 package proton.android.pass.ui.navigation
 
+import android.util.Log
 import androidx.navigation.NavGraphBuilder
+import proton.android.pass.autofill.autofillhealth.ui.AutofillHealthDebugRoute
+import proton.android.pass.autofill.autofillhealth.ui.autofillHealthDebugGraph
 import proton.android.pass.common.api.None
 import proton.android.pass.common.api.some
 import proton.android.pass.common.api.toOption
@@ -51,17 +54,15 @@ import proton.android.pass.features.auth.AuthNavigation
 import proton.android.pass.features.auth.AuthOrigin
 import proton.android.pass.features.auth.EnterPin
 import proton.android.pass.features.auth.authGraph
+import proton.android.pass.features.explore.navigation.CodesNavItem
+import proton.android.pass.features.explore.navigation.ExploreNavDestination
+import proton.android.pass.features.explore.navigation.exploreNavGraph
 import proton.android.pass.features.extrapassword.ExtraPasswordNavigation
 import proton.android.pass.features.extrapassword.configure.navigation.SetExtraPasswordNavItem
 import proton.android.pass.features.extrapassword.confirm.navigation.ConfirmExtraPasswordNavItem
 import proton.android.pass.features.extrapassword.extraPasswordGraph
 import proton.android.pass.features.extrapassword.infosheet.navigation.ExtraPasswordInfoNavItem
 import proton.android.pass.features.extrapassword.options.navigation.ExtraPasswordOptionsNavItem
-import proton.android.pass.autofill.autofillhealth.ui.AutofillHealthDebugRoute
-import proton.android.pass.autofill.autofillhealth.ui.autofillHealthDebugGraph
-import proton.android.pass.features.explore.navigation.CodesNavItem
-import proton.android.pass.features.explore.navigation.ExploreNavDestination
-import proton.android.pass.features.explore.navigation.exploreNavGraph
 import proton.android.pass.features.featureflags.FeatureFlagRoute
 import proton.android.pass.features.featureflags.featureFlagsGraph
 import proton.android.pass.features.home.HOME_ENABLE_BULK_ACTIONS_KEY
@@ -174,8 +175,6 @@ import proton.android.pass.features.migrate.migrateGraph
 import proton.android.pass.features.migrate.warningshared.navigation.MigrateSharedWarningNavItem
 import proton.android.pass.features.onboarding.OnBoarding
 import proton.android.pass.features.onboarding.onBoardingGraph
-import proton.android.pass.features.upsell.v2.navigation.UpsellV2NavItem
-import proton.android.pass.features.upsell.v2.navigation.upsellV2NavGraph
 import proton.android.pass.features.password.GeneratePasswordBottomsheet
 import proton.android.pass.features.password.GeneratePasswordBottomsheetModeValue
 import proton.android.pass.features.password.GeneratePasswordNavigation
@@ -184,11 +183,6 @@ import proton.android.pass.features.password.dialog.separator.WordSeparatorDialo
 import proton.android.pass.features.password.generatePasswordBottomsheetGraph
 import proton.android.pass.features.password.history.PassWordHistoryNavItem
 import proton.android.pass.features.password.history.passwordHistoryGraph
-import proton.android.pass.features.username.GenerateUsernameBottomsheet
-import proton.android.pass.features.username.GenerateUsernameBottomsheetModeValue
-import proton.android.pass.features.username.GenerateUsernameNavigation
-import proton.android.pass.features.username.dialog.separator.UsernameWordSeparatorDialog
-import proton.android.pass.features.username.generateUsernameBottomsheetGraph
 import proton.android.pass.features.profile.AppLockTimeBottomsheet
 import proton.android.pass.features.profile.AppLockTypeBottomsheet
 import proton.android.pass.features.profile.ENTER_PIN_PARAMETER_KEY
@@ -223,6 +217,7 @@ import proton.android.pass.features.security.center.aliaslist.navigation.Securit
 import proton.android.pass.features.security.center.breachdetail.navigation.SecurityCenterAliasEmailBreachDetailNavItem
 import proton.android.pass.features.security.center.breachdetail.navigation.SecurityCenterCustomEmailBreachDetailNavItem
 import proton.android.pass.features.security.center.breachdetail.navigation.SecurityCenterProtonEmailBreachDetailNavItem
+import proton.android.pass.features.security.center.compromisedpass.navigation.SecurityCenterCompromisedPassNavItem
 import proton.android.pass.features.security.center.customemail.navigation.SecurityCenterCustomEmailNavItem
 import proton.android.pass.features.security.center.darkweb.navigation.CustomEmailOptionsNavItem
 import proton.android.pass.features.security.center.darkweb.navigation.DarkWebCannotAddCustomEmailNavItem
@@ -235,7 +230,6 @@ import proton.android.pass.features.security.center.protonlist.navigation.Securi
 import proton.android.pass.features.security.center.report.navigation.SecurityCenterAliasEmailReportNavItem
 import proton.android.pass.features.security.center.report.navigation.SecurityCenterCustomEmailReportNavItem
 import proton.android.pass.features.security.center.report.navigation.SecurityCenterProtonEmailReportNavItem
-import proton.android.pass.features.security.center.compromisedpass.navigation.SecurityCenterCompromisedPassNavItem
 import proton.android.pass.features.security.center.reusepass.navigation.SecurityCenterReusedPassNavItem
 import proton.android.pass.features.security.center.sentinel.navigation.SecurityCenterSentinelNavItem
 import proton.android.pass.features.security.center.shared.navigation.SecurityCenterNavDestination
@@ -243,10 +237,10 @@ import proton.android.pass.features.security.center.shared.navigation.SecurityCe
 import proton.android.pass.features.security.center.shared.navigation.securityCenterNavGraph
 import proton.android.pass.features.security.center.verifyemail.navigation.SecurityCenterVerifyEmailNavItem
 import proton.android.pass.features.security.center.weakpass.navigation.SecurityCenterWeakPassNavItem
+import proton.android.pass.features.settings.AutofillDisplaySelector
 import proton.android.pass.features.settings.ClearClipboardOptions
 import proton.android.pass.features.settings.ClipboardSettings
 import proton.android.pass.features.settings.LogView
-import proton.android.pass.features.settings.AutofillDisplaySelector
 import proton.android.pass.features.settings.Settings
 import proton.android.pass.features.settings.SettingsNavigation
 import proton.android.pass.features.settings.ThemeSelector
@@ -289,9 +283,14 @@ import proton.android.pass.features.sync.navigation.syncNavGraph
 import proton.android.pass.features.upsell.v1.navigation.UpsellNavDestination
 import proton.android.pass.features.upsell.v1.navigation.UpsellNavItem
 import proton.android.pass.features.upsell.v1.navigation.upsellNavGraph
+import proton.android.pass.features.upsell.v2.navigation.UpsellV2NavItem
+import proton.android.pass.features.upsell.v2.navigation.upsellV2NavGraph
+import proton.android.pass.features.username.GenerateUsernameBottomsheet
+import proton.android.pass.features.username.GenerateUsernameBottomsheetModeValue
+import proton.android.pass.features.username.GenerateUsernameNavigation
+import proton.android.pass.features.username.dialog.separator.UsernameWordSeparatorDialog
+import proton.android.pass.features.username.generateUsernameBottomsheetGraph
 import proton.android.pass.features.vault.VaultNavigation
-import proton.android.pass.features.vault.folders.AddFolderToVaultDialog
-import proton.android.pass.features.vault.folders.RenameFolderDialog
 import proton.android.pass.features.vault.bottomsheet.CreateVaultNextAction
 import proton.android.pass.features.vault.bottomsheet.CreateVaultScreen
 import proton.android.pass.features.vault.bottomsheet.EditVaultScreen
@@ -300,6 +299,8 @@ import proton.android.pass.features.vault.bottomsheet.folders.FolderOptionsBotto
 import proton.android.pass.features.vault.bottomsheet.options.VaultOptionsBottomSheet
 import proton.android.pass.features.vault.bottomsheet.select.SelectVaultBottomsheet
 import proton.android.pass.features.vault.delete.DeleteVaultDialog
+import proton.android.pass.features.vault.folders.AddFolderToVaultDialog
+import proton.android.pass.features.vault.folders.RenameFolderDialog
 import proton.android.pass.features.vault.leave.LeaveVaultDialog
 import proton.android.pass.features.vault.organise.OrganiseVaultsNavItem
 import proton.android.pass.features.vault.vaultGraph
@@ -465,6 +466,7 @@ fun NavGraphBuilder.appGraph(
                     VaultOptionsBottomSheet,
                     VaultOptionsBottomSheet.createNavRoute(it.shareId)
                 )
+
                 is HomeNavigation.OpenUserInvite -> appNavigator.navigate(
                     destination = AcceptInviteNavItem,
                     route = AcceptInviteNavItem.createRoute(it.inviteToken),
@@ -656,19 +658,28 @@ fun NavGraphBuilder.appGraph(
                     is CreateItemBottomsheetNavigation.CreateAlias ->
                         appNavigator.navigate(
                             CreateAliasNavItem,
-                            CreateAliasNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            CreateAliasNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
 
                     is CreateItemBottomsheetNavigation.CreateLogin ->
                         appNavigator.navigate(
                             CreateLoginNavItem,
-                            CreateLoginNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            CreateLoginNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
 
                     is CreateItemBottomsheetNavigation.CreateNote ->
                         appNavigator.navigate(
                             CreateNoteNavItem,
-                            CreateNoteNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            CreateNoteNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
 
                     CreateItemBottomsheetNavigation.CreatePassword -> {
@@ -689,19 +700,28 @@ fun NavGraphBuilder.appGraph(
                     is CreateItemBottomsheetNavigation.CreateCreditCard ->
                         appNavigator.navigate(
                             CreateCreditCardNavItem,
-                            CreateCreditCardNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            CreateCreditCardNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
 
                     is CreateItemBottomsheetNavigation.CreateIdentity ->
                         appNavigator.navigate(
                             CreateIdentityNavItem,
-                            CreateIdentityNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            CreateIdentityNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
 
                     is CreateItemBottomsheetNavigation.CreateCustom ->
                         appNavigator.navigate(
                             SelectTemplateNavItem,
-                            SelectTemplateNavItem.createNavRoute(shareId = it.shareId, folderId = it.folderId)
+                            SelectTemplateNavItem.createNavRoute(
+                                shareId = it.shareId,
+                                folderId = it.folderId
+                            )
                         )
                 }
             }
@@ -715,7 +735,12 @@ fun NavGraphBuilder.appGraph(
 
                 VaultNavigation.Upgrade -> onNavigate(AppNavigation.Upgrade)
                 is VaultNavigation.VaultSelected -> dismissBottomSheet {
-                    appNavigator.setResult(mapOf(KEY_VAULT_SELECTED to it.shareId.id, KEY_FOLDER_SELECTED to null))
+                    appNavigator.setResult(
+                        mapOf(
+                            KEY_VAULT_SELECTED to it.shareId.id,
+                            KEY_FOLDER_SELECTED to null
+                        )
+                    )
                 }
 
                 is VaultNavigation.VaultAndFolderSelected -> dismissBottomSheet {
@@ -989,6 +1014,10 @@ fun NavGraphBuilder.appGraph(
                 )
 
                 ProfileNavigation.StorageFull -> appNavigator.navigate(StorageFullNavItem)
+
+                ProfileNavigation.Import -> {
+                    Log.d("DEBUG", "appGraph: Import clicked")
+                }
             }
         }
     )
@@ -1062,7 +1091,10 @@ fun NavGraphBuilder.appGraph(
                     is CreateLoginNavigation.SelectVault -> {
                         appNavigator.navigate(
                             destination = SelectVaultBottomsheet,
-                            route = SelectVaultBottomsheet.createNavRoute(event.shareId, event.folderId)
+                            route = SelectVaultBottomsheet.createNavRoute(
+                                event.shareId,
+                                event.folderId
+                            )
                         )
                     }
                 }
@@ -1333,7 +1365,10 @@ fun NavGraphBuilder.appGraph(
                     CreateNoteNavigation.NoteCreated -> appNavigator.navigateBack()
                     is CreateNoteNavigation.SelectVault -> appNavigator.navigate(
                         destination = SelectVaultBottomsheet,
-                        route = SelectVaultBottomsheet.createNavRoute(cevent.shareId, cevent.folderId)
+                        route = SelectVaultBottomsheet.createNavRoute(
+                            cevent.shareId,
+                            cevent.folderId
+                        )
                     )
                 }
 

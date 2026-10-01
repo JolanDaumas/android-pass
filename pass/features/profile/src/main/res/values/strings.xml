@@ -7,6 +7,7 @@
     <string name="profile_security">Security</string>
     <string name="profile_option_feedback">Feedback</string>
     <string name="profile_option_import_export">Import/export</string>
+    <string name="profile_option_import_keepass">Import keepass</string>
     <string name="profile_option_tutorial">How to use Proton Pass</string>
     <string name="profile_option_rating">Rate app</string>
     <string name="profile_spread_the_word">Spread the word</string>
