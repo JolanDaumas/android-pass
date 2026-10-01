@@ -98,6 +98,8 @@ androidx-sqlite = "2.6.2"
 zxing = "3.5.3"
 coreKtx = "1.17.0"
 
+kotpass = "0.13.0"
+
 [plugins]
 gradlePlugin-android-baselineprofile = { id = "androidx.baselineprofile", version.ref = "gradlePlugin-baselineprofile" }
 gradlePlugin-android-benchmark = { id = "androidx.benchmark", version.ref = "androidx-benchmark" }
@@ -366,6 +368,9 @@ fusion = { module = "me.proton.test:fusion", version.ref = "fusion" }
 
 # Zxing
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+
+# crypto
+kotpass = { module = "app.keemobile:kotpass", version.ref = "kotpass" }
 
 
 [bundles]
