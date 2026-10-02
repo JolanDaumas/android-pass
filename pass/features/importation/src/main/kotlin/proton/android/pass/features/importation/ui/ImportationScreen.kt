@@ -37,6 +37,7 @@ fun ImportationScreen(
     ImportationContent(
         modifier = modifier,
         state = state,
+        onEvent = viewModel::onEvent,
         onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
     )
 }

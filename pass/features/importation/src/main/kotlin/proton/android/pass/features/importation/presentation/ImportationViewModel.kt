@@ -23,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,4 +31,37 @@ class ImportationViewModel @Inject constructor() : ViewModel() {
 
     private val _state = MutableStateFlow(ImportationUiState())
     val state: StateFlow<ImportationUiState> = _state.asStateFlow()
+
+    fun onEvent(event: ImportationUiEvent) {
+        when (event) {
+            is ImportationUiEvent.OnFileSelected -> {
+                _state.update {
+                    it.copy(
+                        selectedFileUri = event.uri,
+                        selectedFileName = event.fileName,
+                        fileError = null
+                    )
+                }
+            }
+
+            is ImportationUiEvent.OnPasswordChange -> {
+                _state.update {
+                    it.copy(
+                        masterPassword = event.password,
+                        passwordError = null
+                    )
+                }
+            }
+
+            is ImportationUiEvent.OnTogglePasswordVisibility -> {
+                _state.update {
+                    it.copy(isPasswordVisible = event.isVisible)
+                }
+            }
+
+            ImportationUiEvent.OnSubmit -> {
+                // Handle submit logic
+            }
+        }
+    }
 }

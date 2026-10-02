@@ -19,19 +19,10 @@
 package proton.android.pass.features.importation.presentation
 
 import android.net.Uri
-import androidx.compose.runtime.Immutable
 
-@Immutable
-data class ImportationUiState(
-    val title: String = "Importation",
-    val selectedFileUri: Uri? = null,
-    val selectedFileName: String? = null,
-    val masterPassword: String = "",
-    val isPasswordVisible: Boolean = false,
-    val isLoading: Boolean = false,
-    val fileError: String? = null,
-    val passwordError: String? = null
-) {
-    val isSubmitEnabled: Boolean
-        get() = selectedFileUri != null && masterPassword.isNotBlank() && !isLoading
+sealed interface ImportationUiEvent {
+    data class OnFileSelected(val uri: Uri, val fileName: String?) : ImportationUiEvent
+    data class OnPasswordChange(val password: String) : ImportationUiEvent
+    data class OnTogglePasswordVisibility(val isVisible: Boolean) : ImportationUiEvent
+    data object OnSubmit : ImportationUiEvent
 }
