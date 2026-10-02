@@ -16,17 +16,26 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.presentation
+package proton.android.pass.features.importation.domain.model
 
-import android.net.Uri
+data class ImportedVault(
+    val name: String,
+    val groups: List<ImportedGroup>,
+    val entries: List<ImportedEntry>
+)
 
-sealed interface ImportationUiEvent {
-    data class OnFileSelected(val uri: Uri, val fileName: String?) : ImportationUiEvent
-    data class OnPasswordChange(val password: String) : ImportationUiEvent
-    data class OnTogglePasswordVisibility(val isVisible: Boolean) : ImportationUiEvent
-    data class OnToggleGroupSelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data class OnToggleEntrySelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data object OnSubmit : ImportationUiEvent
-    data object OnConfirmSelection : ImportationUiEvent
-    data object OnBackStep : ImportationUiEvent
-}
+data class ImportedGroup(
+    val uuid: String,
+    val name: String,
+    val groups: List<ImportedGroup>,
+    val entries: List<ImportedEntry>
+)
+
+data class ImportedEntry(
+    val uuid: String,
+    val title: String,
+    val userName: String,
+    val password: String,
+    val url: String,
+    val notes: String
+)

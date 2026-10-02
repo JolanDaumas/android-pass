@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import proton.android.pass.features.importation.navigation.ImportationNavDestination
+import proton.android.pass.features.importation.presentation.ImportationStep
+import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationViewModel
 
 @Composable
@@ -34,10 +36,22 @@ fun ImportationScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ImportationContent(
-        modifier = modifier,
-        state = state,
-        onEvent = viewModel::onEvent,
-        onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
-    )
+    when (state.step) {
+        ImportationStep.InputCredentials -> {
+            ImportationContent(
+                modifier = modifier,
+                state = state,
+                onEvent = viewModel::onEvent,
+                onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
+            )
+        }
+        ImportationStep.SelectItems -> {
+            ImportationSelectionContent(
+                modifier = modifier,
+                state = state,
+                onEvent = viewModel::onEvent,
+                onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
+            )
+        }
+    }
 }

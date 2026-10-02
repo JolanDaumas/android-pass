@@ -27,4 +27,6 @@
     <string name="importation_next_button">Suivant</string>
     <string name="importation_action_conceal_password">Masquer le mot de passe</string>
     <string name="importation_action_reveal_password">Afficher le mot de passe</string>
+    <string name="importation_selection_title">Sélectionner les éléments</string>
+    <string name="importation_confirm_button">Importer</string>
 </resources>

@@ -19,15 +19,20 @@
 package proton.android.pass.features.importation.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import proton.android.pass.features.importation.domain.usecase.ImportVaultUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class ImportationViewModel @Inject constructor() : ViewModel() {
+class ImportationViewModel @Inject constructor(
+    private val importVaultUseCase: ImportVaultUseCase
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ImportationUiState())
     val state: StateFlow<ImportationUiState> = _state.asStateFlow()
@@ -59,9 +64,110 @@ class ImportationViewModel @Inject constructor() : ViewModel() {
                 }
             }
 
+            is ImportationUiEvent.OnToggleGroupSelection -> {
+                _state.update { state ->
+                    val (newGroups, newEntries) = updateGroupAndEntrySelection(
+                        state.selectableGroups,
+                        state.selectableEntries,
+                        event.uuid,
+                        event.isSelected,
+                        isGroup = true
+                    )
+                    state.copy(selectableGroups = newGroups, selectableEntries = newEntries)
+                }
+            }
+
+            is ImportationUiEvent.OnToggleEntrySelection -> {
+                _state.update { state ->
+                    val (newGroups, newEntries) = updateGroupAndEntrySelection(
+                        state.selectableGroups,
+                        state.selectableEntries,
+                        event.uuid,
+                        event.isSelected,
+                        isGroup = false
+                    )
+                    state.copy(selectableGroups = newGroups, selectableEntries = newEntries)
+                }
+            }
+
             ImportationUiEvent.OnSubmit -> {
-                // Handle submit logic
+                val uri = _state.value.selectedFileUri ?: return
+                val password = _state.value.masterPassword
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = true, fileError = null, passwordError = null) }
+                    val result = importVaultUseCase(uri, password)
+                    result.fold(
+                        onSuccess = { vault ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    step = ImportationStep.SelectItems,
+                                    vaultName = vault.name,
+                                    selectableGroups = vault.toSelectableGroups(),
+                                    selectableEntries = vault.toSelectableEntries()
+                                )
+                            }
+                        },
+                        onFailure = { error ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    passwordError = error.localizedMessage ?: "Import failed"
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            ImportationUiEvent.OnConfirmSelection -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = true) }
+                    // Final import action using selected items
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
+
+            ImportationUiEvent.OnBackStep -> {
+                _state.update {
+                    it.copy(step = ImportationStep.InputCredentials)
+                }
             }
         }
+    }
+
+    private fun updateGroupAndEntrySelection(
+        groups: List<SelectableGroup>,
+        entries: List<SelectableEntry>,
+        uuid: String,
+        isSelected: Boolean,
+        isGroup: Boolean
+    ): Pair<List<SelectableGroup>, List<SelectableEntry>> {
+        if (isGroup) {
+            val newGroups = groups.map { group ->
+                if (group.uuid == uuid) {
+                    cascadeSelectGroup(group, isSelected)
+                } else {
+                    val (subGroups, subEntries) = updateGroupAndEntrySelection(group.groups, group.entries, uuid, isSelected, true)
+                    group.copy(groups = subGroups, entries = subEntries)
+                }
+            }
+            return newGroups to entries
+        } else {
+            val newEntries = entries.map { if (it.uuid == uuid) it.copy(isSelected = isSelected) else it }
+            val newGroups = groups.map { group ->
+                val (subGroups, subEntries) = updateGroupAndEntrySelection(group.groups, group.entries, uuid, isSelected, false)
+                group.copy(groups = subGroups, entries = subEntries)
+            }
+            return newGroups to newEntries
+        }
+    }
+
+    private fun cascadeSelectGroup(group: SelectableGroup, isSelected: Boolean): SelectableGroup {
+        return group.copy(
+            isSelected = isSelected,
+            groups = group.groups.map { cascadeSelectGroup(it, isSelected) },
+            entries = group.entries.map { it.copy(isSelected = isSelected) }
+        )
     }
 }

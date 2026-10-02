@@ -16,17 +16,23 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.presentation
+package proton.android.pass.features.importation.di
 
-import android.net.Uri
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import proton.android.pass.features.importation.data.repository.ImportationRepositoryImpl
+import proton.android.pass.features.importation.domain.repository.ImportationRepository
+import javax.inject.Singleton
 
-sealed interface ImportationUiEvent {
-    data class OnFileSelected(val uri: Uri, val fileName: String?) : ImportationUiEvent
-    data class OnPasswordChange(val password: String) : ImportationUiEvent
-    data class OnTogglePasswordVisibility(val isVisible: Boolean) : ImportationUiEvent
-    data class OnToggleGroupSelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data class OnToggleEntrySelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data object OnSubmit : ImportationUiEvent
-    data object OnConfirmSelection : ImportationUiEvent
-    data object OnBackStep : ImportationUiEvent
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ImportationDataModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindImportationRepository(
+        impl: ImportationRepositoryImpl
+    ): ImportationRepository
 }

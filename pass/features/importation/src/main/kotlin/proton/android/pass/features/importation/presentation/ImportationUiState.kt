@@ -24,14 +24,21 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class ImportationUiState(
     val title: String = "Importation",
+    val step: ImportationStep = ImportationStep.InputCredentials,
     val selectedFileUri: Uri? = null,
     val selectedFileName: String? = null,
     val masterPassword: String = "",
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
     val fileError: String? = null,
-    val passwordError: String? = null
+    val passwordError: String? = null,
+    val vaultName: String? = null,
+    val selectableGroups: List<SelectableGroup> = emptyList(),
+    val selectableEntries: List<SelectableEntry> = emptyList()
 ) {
     val isSubmitEnabled: Boolean
-        get() = selectedFileUri != null && masterPassword.isNotBlank() && !isLoading
+        get() = when (step) {
+            ImportationStep.InputCredentials -> selectedFileUri != null && masterPassword.isNotBlank() && !isLoading
+            ImportationStep.SelectItems -> !isLoading
+        }
 }

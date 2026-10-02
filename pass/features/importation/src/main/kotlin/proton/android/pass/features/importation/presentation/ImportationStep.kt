@@ -18,15 +18,7 @@
 
 package proton.android.pass.features.importation.presentation
 
-import android.net.Uri
-
-sealed interface ImportationUiEvent {
-    data class OnFileSelected(val uri: Uri, val fileName: String?) : ImportationUiEvent
-    data class OnPasswordChange(val password: String) : ImportationUiEvent
-    data class OnTogglePasswordVisibility(val isVisible: Boolean) : ImportationUiEvent
-    data class OnToggleGroupSelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data class OnToggleEntrySelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data object OnSubmit : ImportationUiEvent
-    data object OnConfirmSelection : ImportationUiEvent
-    data object OnBackStep : ImportationUiEvent
+enum class ImportationStep {
+    InputCredentials,
+    SelectItems
 }

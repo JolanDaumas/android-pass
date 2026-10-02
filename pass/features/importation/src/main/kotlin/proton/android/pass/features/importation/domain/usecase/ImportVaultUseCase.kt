@@ -16,17 +16,17 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.presentation
+package proton.android.pass.features.importation.domain.usecase
 
 import android.net.Uri
+import proton.android.pass.features.importation.domain.model.ImportedVault
+import proton.android.pass.features.importation.domain.repository.ImportationRepository
+import javax.inject.Inject
 
-sealed interface ImportationUiEvent {
-    data class OnFileSelected(val uri: Uri, val fileName: String?) : ImportationUiEvent
-    data class OnPasswordChange(val password: String) : ImportationUiEvent
-    data class OnTogglePasswordVisibility(val isVisible: Boolean) : ImportationUiEvent
-    data class OnToggleGroupSelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data class OnToggleEntrySelection(val uuid: String, val isSelected: Boolean) : ImportationUiEvent
-    data object OnSubmit : ImportationUiEvent
-    data object OnConfirmSelection : ImportationUiEvent
-    data object OnBackStep : ImportationUiEvent
+class ImportVaultUseCase @Inject constructor(
+    private val importationRepository: ImportationRepository
+) {
+    suspend operator fun invoke(uri: Uri, masterPassword: String): Result<ImportedVault> {
+        return importationRepository.importVault(uri, masterPassword)
+    }
 }
