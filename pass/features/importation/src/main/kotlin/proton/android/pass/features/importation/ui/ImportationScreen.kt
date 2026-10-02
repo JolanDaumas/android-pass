@@ -18,17 +18,25 @@
 
 package proton.android.pass.features.importation.ui
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import proton.android.pass.composecomponents.impl.bottomsheet.PassModalBottomSheetLayout
 import proton.android.pass.features.importation.navigation.ImportationNavDestination
 import proton.android.pass.features.importation.presentation.ImportationStep
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ImportationScreen(
     modifier: Modifier = Modifier,
@@ -36,6 +44,21 @@ fun ImportationScreen(
     viewModel: ImportationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true,
+        confirmValueChange = { target ->
+            target != ModalBottomSheetValue.Hidden || !state.isLoading
+        }
+    )
+
+    LaunchedEffect(state.isLoading, state.step) {
+        if (state.isLoading && state.step == ImportationStep.UploadEntries) {
+            sheetState.show()
+        } else if (sheetState.isVisible) {
+            sheetState.hide()
+        }
+    }
 
     LaunchedEffect(state.isImportComplete) {
         if (state.isImportComplete) {
@@ -43,29 +66,35 @@ fun ImportationScreen(
         }
     }
 
-    when (state.step) {
-        ImportationStep.InputCredentials -> {
-            ImportationContent(
-                modifier = modifier,
-                state = state,
-                onEvent = viewModel::onEvent,
-                onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
-            )
+    PassModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            if (state.step == ImportationStep.UploadEntries) {
+                ImportationProgressBottomSheetContent(state = state)
+            } else {
+                Spacer(modifier = Modifier.height(1.dp))
+            }
+        },
+        content = {
+            when (state.step) {
+                ImportationStep.InputCredentials -> {
+                    ImportationContent(
+                        modifier = modifier,
+                        state = state,
+                        onEvent = viewModel::onEvent,
+                        onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
+                    )
+                }
+                ImportationStep.SelectItems,
+                ImportationStep.UploadEntries -> {
+                    ImportationSelectionContent(
+                        modifier = modifier,
+                        state = state,
+                        onEvent = viewModel::onEvent,
+                        onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
+                    )
+                }
+            }
         }
-        ImportationStep.SelectItems -> {
-            ImportationSelectionContent(
-                modifier = modifier,
-                state = state,
-                onEvent = viewModel::onEvent,
-                onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
-            )
-        }
-        ImportationStep.UploadEntries -> {
-            ImportationProgressContent(
-                modifier = modifier,
-                state = state,
-                onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
-            )
-        }
-    }
+    )
 }

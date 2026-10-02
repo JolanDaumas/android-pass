@@ -39,9 +39,9 @@ import proton.android.pass.domain.inappmessages.InAppMessageId
 import proton.android.pass.domain.items.ItemCategory
 import proton.android.pass.navigation.api.NavItem
 import proton.android.pass.navigation.api.NavItemType
+import proton.android.pass.navigation.api.bottomSheet
 import proton.android.pass.navigation.api.composable
 import proton.android.pass.navigation.api.dialog
-import proton.android.pass.navigation.api.bottomSheet
 
 const val HOME_ENABLE_BULK_ACTIONS_KEY = "home_enable_bulk_actions"
 

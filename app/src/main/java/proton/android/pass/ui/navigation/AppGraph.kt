@@ -376,7 +376,6 @@ fun NavGraphBuilder.appGraph(
 
                 HomeNavigation.CloseScreen -> appNavigator.navigateBack()
                 HomeNavigation.CloseImportSuccessBottomSheet -> appNavigator.navigateBack()
-
                 HomeNavigation.CreateVault -> {
                     appNavigator.navigate(
                         destination = CreateVaultScreen,

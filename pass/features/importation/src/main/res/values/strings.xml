@@ -31,7 +31,4 @@
     <string name="importation_error_generic">Import failed</string>
     <string name="importation_error_import">Could not import the selected passwords</string>
     <string name="importation_progress_title">Importing</string>
-    <string name="importation_progress_sending">Sending</string>
-    <string name="importation_progress_sent">Imported</string>
-    <string name="importation_progress_failed">Failed</string>
 </resources>

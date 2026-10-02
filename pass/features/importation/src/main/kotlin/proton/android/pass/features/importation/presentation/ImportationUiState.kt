@@ -53,8 +53,6 @@ data class ImportationUiState(
 @Immutable
 data class ImportProgressEntry(
     val uuid: String,
-    val title: String,
-    val userName: String,
     val status: ImportProgressStatus = ImportProgressStatus.Pending
 )
 

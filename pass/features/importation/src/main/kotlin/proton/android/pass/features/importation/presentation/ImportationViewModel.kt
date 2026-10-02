@@ -57,8 +57,7 @@ class ImportationViewModel @Inject constructor(
                     it.copy(
                         selectedFileUri = event.uri,
                         selectedFileName = event.fileName,
-                        fileError = null,
-                        importError = null
+                        fileError = null
                     )
                 }
                 importedEntriesByUuid = emptyMap()
@@ -164,8 +163,6 @@ class ImportationViewModel @Inject constructor(
                             importProgressEntries = selectedEntries.map { entry ->
                                 ImportProgressEntry(
                                     uuid = entry.uuid,
-                                    title = entry.title,
-                                    userName = entry.userName,
                                     status = previousProgressByUuid[entry.uuid]
                                         ?.status
                                         ?.takeIf { status -> status == ImportProgressStatus.Imported }
@@ -205,6 +202,7 @@ class ImportationViewModel @Inject constructor(
                     if (uploadFailures.any { it }) {
                         _state.update {
                             it.copy(
+                                step = ImportationStep.SelectItems,
                                 isLoading = false,
                                 importError = context.getString(R.string.importation_error_import)
                             )
