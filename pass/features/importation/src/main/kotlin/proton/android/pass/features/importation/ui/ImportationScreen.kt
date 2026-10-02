@@ -60,5 +60,12 @@ fun ImportationScreen(
                 onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
             )
         }
+        ImportationStep.UploadEntries -> {
+            ImportationProgressContent(
+                modifier = modifier,
+                state = state,
+                onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
+            )
+        }
     }
 }

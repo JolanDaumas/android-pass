@@ -35,7 +35,8 @@ data class ImportationUiState(
     val isImportComplete: Boolean = false,
     val vaultName: String? = null,
     val selectableGroups: List<SelectableGroup> = emptyList(),
-    val selectableEntries: List<SelectableEntry> = emptyList()
+    val selectableEntries: List<SelectableEntry> = emptyList(),
+    val importProgressEntries: List<ImportProgressEntry> = emptyList()
 ) {
     val selectedEntryCount: Int
         get() = selectableEntries.count { it.isSelected } +
@@ -45,7 +46,23 @@ data class ImportationUiState(
         get() = when (step) {
             ImportationStep.InputCredentials -> selectedFileUri != null && masterPassword.isNotBlank() && !isLoading
             ImportationStep.SelectItems -> selectedEntryCount > 0 && !isLoading
+            ImportationStep.UploadEntries -> false
         }
+}
+
+@Immutable
+data class ImportProgressEntry(
+    val uuid: String,
+    val title: String,
+    val userName: String,
+    val status: ImportProgressStatus = ImportProgressStatus.Pending
+)
+
+enum class ImportProgressStatus {
+    Pending,
+    Uploading,
+    Imported,
+    Failed
 }
 
 private fun SelectableGroup.selectedEntryCount(): Int =

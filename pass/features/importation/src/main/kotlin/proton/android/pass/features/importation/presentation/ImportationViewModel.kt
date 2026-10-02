@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -149,33 +151,86 @@ class ImportationViewModel @Inject constructor(
                 val selectedEntries = currentState.selectableEntries()
                     .filter(SelectableEntry::isSelected)
                     .mapNotNull { importedEntriesByUuid[it.uuid] }
+                val previousProgressByUuid = currentState.importProgressEntries.associateBy(ImportProgressEntry::uuid)
+                val entriesToUpload = selectedEntries.filter { entry ->
+                    previousProgressByUuid[entry.uuid]?.status != ImportProgressStatus.Imported
+                }
                 viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true, importError = null) }
-                    importSelectedPasswordsUseCase(selectedEntries).fold(
-                        onSuccess = {
-                            importedEntriesByUuid = emptyMap()
-                            _state.update {
-                                it.copy(
-                                    isLoading = false,
-                                    isImportComplete = true
+                    _state.update {
+                        it.copy(
+                            step = ImportationStep.UploadEntries,
+                            isLoading = true,
+                            importError = null,
+                            importProgressEntries = selectedEntries.map { entry ->
+                                ImportProgressEntry(
+                                    uuid = entry.uuid,
+                                    title = entry.title,
+                                    userName = entry.userName,
+                                    status = previousProgressByUuid[entry.uuid]
+                                        ?.status
+                                        ?.takeIf { status -> status == ImportProgressStatus.Imported }
+                                        ?: ImportProgressStatus.Pending
                                 )
                             }
-                        },
-                        onFailure = {
-                            _state.update {
-                                it.copy(
-                                    isLoading = false,
-                                    importError = context.getString(R.string.importation_error_import)
-                                )
-                            }
+                        )
+                    }
+
+                    if (entriesToUpload.isEmpty()) {
+                        importedEntriesByUuid = emptyMap()
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                isImportComplete = true
+                            )
                         }
-                    )
+                        return@launch
+                    }
+
+                    val uploadFailures = entriesToUpload.map { entry ->
+                        async {
+                            updateImportProgress(entry.uuid, ImportProgressStatus.Uploading)
+                            importSelectedPasswordsUseCase(listOf(entry)).fold(
+                                onSuccess = {
+                                    updateImportProgress(entry.uuid, ImportProgressStatus.Imported)
+                                    false
+                                },
+                                onFailure = {
+                                    updateImportProgress(entry.uuid, ImportProgressStatus.Failed)
+                                    true
+                                }
+                            )
+                        }
+                    }.awaitAll()
+
+                    if (uploadFailures.any { it }) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                importError = context.getString(R.string.importation_error_import)
+                            )
+                        }
+                    } else {
+                        importedEntriesByUuid = emptyMap()
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                isImportComplete = true
+                            )
+                        }
+                    }
                 }
             }
 
             ImportationUiEvent.OnBackStep -> {
+                if (_state.value.isLoading) return
                 _state.update {
-                    it.copy(step = ImportationStep.InputCredentials)
+                    it.copy(
+                        step = when (it.step) {
+                            ImportationStep.InputCredentials -> ImportationStep.InputCredentials
+                            ImportationStep.SelectItems -> ImportationStep.InputCredentials
+                            ImportationStep.UploadEntries -> ImportationStep.SelectItems
+                        }
+                    )
                 }
             }
         }
@@ -227,4 +282,14 @@ class ImportationViewModel @Inject constructor(
 
     private fun SelectableGroup.allEntries(): List<SelectableEntry> =
         entries + groups.flatMap { it.allEntries() }
+
+    private fun updateImportProgress(uuid: String, status: ImportProgressStatus) {
+        _state.update { state ->
+            state.copy(
+                importProgressEntries = state.importProgressEntries.map { entry ->
+                    if (entry.uuid == uuid) entry.copy(status = status) else entry
+                }
+            )
+        }
+    }
 }

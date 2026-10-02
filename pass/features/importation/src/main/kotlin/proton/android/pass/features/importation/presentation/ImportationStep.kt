@@ -20,5 +20,6 @@ package proton.android.pass.features.importation.presentation
 
 enum class ImportationStep {
     InputCredentials,
-    SelectItems
+    SelectItems,
+    UploadEntries
 }

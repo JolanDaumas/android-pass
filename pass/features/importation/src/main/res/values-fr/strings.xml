@@ -11,4 +11,9 @@
     <string name="importation_selection_title">Items</string>
     <string name="importation_confirm_button">Importer</string>
     <string name="importation_error_generic">Échec de l’importation</string>
+    <string name="importation_error_import">Impossible d’importer les mots de passe sélectionnés</string>
+    <string name="importation_progress_title">Importation en cours</string>
+    <string name="importation_progress_sending">Envoi</string>
+    <string name="importation_progress_sent">Importé</string>
+    <string name="importation_progress_failed">Échec</string>
 </resources>
