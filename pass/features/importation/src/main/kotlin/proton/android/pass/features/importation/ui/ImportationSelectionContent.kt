@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +47,7 @@ import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationUiState
 import proton.android.pass.features.importation.presentation.SelectableEntry
 import proton.android.pass.features.importation.presentation.SelectableGroup
+import proton.android.pass.features.importation.ui.components.rememberAccordionState
 import proton.android.pass.features.importation.ui.components.SelectableEntryItem
 import proton.android.pass.features.importation.ui.components.SelectableGroupItem
 
@@ -56,6 +58,8 @@ fun ImportationSelectionContent(
     onEvent: (ImportationUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val accordionState = rememberAccordionState()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -108,7 +112,14 @@ fun ImportationSelectionContent(
                 verticalArrangement = Arrangement.spacedBy(Spacing.small)
             ) {
                 state.selectableGroups.forEach { group ->
-                    SelectableGroupItem(group = group, onEvent = onEvent, depth = 0)
+                    key(group.uuid) {
+                        SelectableGroupItem(
+                            group = group,
+                            onEvent = onEvent,
+                            accordionState = accordionState,
+                            depth = 0
+                        )
+                    }
                 }
 
                 state.selectableEntries.forEach { entry ->

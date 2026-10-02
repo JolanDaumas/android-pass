@@ -18,25 +18,22 @@
 
 package proton.android.pass.features.importation.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.proton.core.compose.theme.ProtonTheme
 import proton.android.pass.commonui.api.PassTheme
-import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
+import proton.android.pass.features.importation.presentation.SelectableEntry
 import proton.android.pass.features.importation.presentation.SelectableGroup
 import me.proton.core.presentation.R as CoreR
 
@@ -45,16 +42,17 @@ fun SelectableGroupItem(
     modifier: Modifier = Modifier,
     group: SelectableGroup,
     onEvent: (ImportationUiEvent) -> Unit,
+    accordionState: AccordionState,
     depth: Int = 0
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(start = (depth * 16).dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Spacing.extraSmall),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small)
-        ) {
+    val hasContent = group.groups.isNotEmpty() || group.entries.isNotEmpty()
+
+    Accordion(
+        modifier = modifier.fillMaxWidth().padding(start = (depth * 16).dp),
+        state = accordionState,
+        key = group.uuid,
+        isExpandable = hasContent,
+        headerContent = {
             Icon(
                 painter = painterResource(CoreR.drawable.ic_proton_folder),
                 contentDescription = null,
@@ -72,24 +70,28 @@ fun SelectableGroupItem(
                     onEvent(ImportationUiEvent.OnToggleGroupSelection(group.uuid, isChecked))
                 }
             )
-        }
+        },
+        content = {
+            group.groups.forEach { subGroup ->
+                key(subGroup.uuid) {
+                    SelectableGroupItem(
+                        group = subGroup,
+                        onEvent = onEvent,
+                        accordionState = accordionState,
+                        depth = depth + 1
+                    )
+                }
+            }
 
-        group.groups.forEach { subGroup ->
-            SelectableGroupItem(
-                group = subGroup,
-                onEvent = onEvent,
-                depth = depth + 1
-            )
+            group.entries.forEach { entry ->
+                SelectableEntryItem(
+                    entry = entry,
+                    onEvent = onEvent,
+                    depth = depth + 1
+                )
+            }
         }
-
-        group.entries.forEach { entry ->
-            SelectableEntryItem(
-                entry = entry,
-                onEvent = onEvent,
-                depth = depth + 1
-            )
-        }
-    }
+    )
 }
 
 @Preview
@@ -100,9 +102,17 @@ private fun SelectableGroupItemPreview() {
             group = SelectableGroup(
                 uuid = "1",
                 name = "Personal",
-                isSelected = true
+                isSelected = true,
+                entries = listOf(
+                    SelectableEntry(
+                        uuid = "2",
+                        title = "GitHub",
+                        userName = "user@proton.me"
+                    )
+                )
             ),
-            onEvent = {}
+            onEvent = {},
+            accordionState = rememberAccordionState()
         )
     }
 }
