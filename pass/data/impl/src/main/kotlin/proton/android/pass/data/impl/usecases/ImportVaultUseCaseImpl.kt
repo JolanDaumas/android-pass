@@ -16,26 +16,18 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.domain.model
+package proton.android.pass.data.impl.usecases
 
-data class ImportedVault(
-    val name: String,
-    val groups: List<ImportedGroup>,
-    val entries: List<ImportedEntry>
-)
+import proton.android.pass.data.api.repositories.ImportationRepository
+import proton.android.pass.data.api.usecases.ImportVaultUseCase
+import proton.android.pass.domain.ImportedVault
+import java.net.URI
+import javax.inject.Inject
 
-data class ImportedGroup(
-    val uuid: String,
-    val name: String,
-    val groups: List<ImportedGroup>,
-    val entries: List<ImportedEntry>
-)
-
-data class ImportedEntry(
-    val uuid: String,
-    val title: String,
-    val userName: String,
-    val password: String,
-    val url: String,
-    val notes: String
-)
+class ImportVaultUseCaseImpl @Inject constructor(
+    private val importationRepository: ImportationRepository
+) : ImportVaultUseCase {
+    override suspend fun invoke(uri: URI, masterPassword: String): Result<ImportedVault> {
+        return importationRepository.importVault(uri, masterPassword)
+    }
+}

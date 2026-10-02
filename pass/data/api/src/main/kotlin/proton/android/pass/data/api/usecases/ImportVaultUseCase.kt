@@ -16,17 +16,11 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.domain.usecase
+package proton.android.pass.data.api.usecases
 
-import android.net.Uri
-import proton.android.pass.features.importation.domain.model.ImportedVault
-import proton.android.pass.features.importation.domain.repository.ImportationRepository
-import javax.inject.Inject
+import proton.android.pass.domain.ImportedVault
+import java.net.URI
 
-class ImportVaultUseCase @Inject constructor(
-    private val importationRepository: ImportationRepository
-) {
-    suspend operator fun invoke(uri: Uri, masterPassword: String): Result<ImportedVault> {
-        return importationRepository.importVault(uri, masterPassword)
-    }
+interface ImportVaultUseCase {
+    suspend operator fun invoke(uri: URI, masterPassword: String): Result<ImportedVault>
 }

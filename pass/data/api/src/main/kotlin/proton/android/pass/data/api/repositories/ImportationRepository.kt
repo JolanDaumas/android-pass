@@ -16,23 +16,11 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.di
+package proton.android.pass.data.api.repositories
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import proton.android.pass.features.importation.data.repository.ImportationRepositoryImpl
-import proton.android.pass.features.importation.domain.repository.ImportationRepository
-import javax.inject.Singleton
+import proton.android.pass.domain.ImportedVault
+import java.net.URI
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class ImportationDataModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindImportationRepository(
-        impl: ImportationRepositoryImpl
-    ): ImportationRepository
+interface ImportationRepository {
+    suspend fun importVault(uri: URI, masterPassword: String): Result<ImportedVault>
 }

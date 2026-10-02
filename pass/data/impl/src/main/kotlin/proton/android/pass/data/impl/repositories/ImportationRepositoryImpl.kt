@@ -16,10 +16,10 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.data.repository
+package proton.android.pass.data.impl.repositories
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.Credentials
 import app.keemobile.kotpass.database.KeePassDatabase
@@ -29,18 +29,20 @@ import app.keemobile.kotpass.models.Group
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import proton.android.pass.features.importation.domain.model.ImportedEntry
-import proton.android.pass.features.importation.domain.model.ImportedGroup
-import proton.android.pass.features.importation.domain.model.ImportedVault
-import proton.android.pass.features.importation.domain.repository.ImportationRepository
+import proton.android.pass.data.api.repositories.ImportationRepository
+import proton.android.pass.domain.ImportedEntry
+import proton.android.pass.domain.ImportedGroup
+import proton.android.pass.domain.ImportedVault
+import java.net.URI
 import javax.inject.Inject
 
 class ImportationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ImportationRepository {
-    override suspend fun importVault(uri: Uri, masterPassword: String): Result<ImportedVault> = withContext(Dispatchers.IO) {
+    override suspend fun importVault(uri: URI, masterPassword: String): Result<ImportedVault> = withContext(Dispatchers.IO) {
         runCatching {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            val contentUri = uri.toString().toUri()
+            context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
                 val credentials = Credentials.from(EncryptedValue.fromString(masterPassword))
                 val keePassDatabase = KeePassDatabase.decode(inputStream, credentials)
                 keePassDatabase.toImportedVault()

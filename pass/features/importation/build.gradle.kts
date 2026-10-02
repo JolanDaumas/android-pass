@@ -51,6 +51,8 @@ dependencies {
     implementation(projects.pass.commonUi.api)
     implementation(projects.pass.commonUiModels.api)
     implementation(projects.pass.composeComponents.impl)
+    implementation(projects.pass.data.api)
+    implementation(projects.pass.domain)
     implementation(projects.pass.navigation.api)
 
     implementation(libs.androidx.compose.foundation)
@@ -63,7 +65,6 @@ dependencies {
     implementation(libs.core.presentation)
     implementation(libs.core.presentation.compose)
     implementation(libs.dagger.hilt.android)
-    implementation(libs.kotpass)
 
     ksp(libs.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)

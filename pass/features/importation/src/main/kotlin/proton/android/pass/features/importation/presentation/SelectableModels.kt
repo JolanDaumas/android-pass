@@ -18,9 +18,9 @@
 
 package proton.android.pass.features.importation.presentation
 
-import proton.android.pass.features.importation.domain.model.ImportedEntry
-import proton.android.pass.features.importation.domain.model.ImportedGroup
-import proton.android.pass.features.importation.domain.model.ImportedVault
+import proton.android.pass.domain.ImportedEntry
+import proton.android.pass.domain.ImportedGroup
+import proton.android.pass.domain.ImportedVault
 
 data class SelectableGroup(
     val uuid: String,

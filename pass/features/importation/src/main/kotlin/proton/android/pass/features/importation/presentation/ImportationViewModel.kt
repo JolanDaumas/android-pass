@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import proton.android.pass.features.importation.domain.usecase.ImportVaultUseCase
+import proton.android.pass.data.api.usecases.ImportVaultUseCase
+import java.net.URI
 import javax.inject.Inject
 
 @HiltViewModel
@@ -95,7 +96,7 @@ class ImportationViewModel @Inject constructor(
                 val password = _state.value.masterPassword
                 viewModelScope.launch {
                     _state.update { it.copy(isLoading = true, fileError = null, passwordError = null) }
-                    val result = importVaultUseCase(uri, password)
+                    val result = importVaultUseCase(java.net.URI(uri.toString()), password)
                     result.fold(
                         onSuccess = { vault ->
                             _state.update {

@@ -51,6 +51,7 @@ import proton.android.pass.data.api.usecases.CreateItem
 import proton.android.pass.data.api.usecases.CreateLoginAndAlias
 import proton.android.pass.data.api.usecases.CreatePin
 import proton.android.pass.data.api.usecases.CreateVault
+import proton.android.pass.data.api.usecases.ImportVaultUseCase
 import proton.android.pass.data.api.usecases.DeleteItems
 import proton.android.pass.data.api.usecases.DeleteVault
 import proton.android.pass.data.api.usecases.GetAddressById
@@ -327,6 +328,7 @@ import proton.android.pass.data.impl.usecases.CreateItemImpl
 import proton.android.pass.data.impl.usecases.CreateLoginAndAliasImpl
 import proton.android.pass.data.impl.usecases.CreatePinImpl
 import proton.android.pass.data.impl.usecases.CreateVaultImpl
+import proton.android.pass.data.impl.usecases.ImportVaultUseCaseImpl
 import proton.android.pass.data.impl.usecases.DeleteItemsImpl
 import proton.android.pass.data.impl.usecases.DeleteVaultImpl
 import proton.android.pass.data.impl.usecases.GetAddressByIdImpl
@@ -1502,5 +1504,8 @@ abstract class DataUseCaseModule {
 
     @Binds
     abstract fun bindRefreshCompromisedPasswords(impl: RefreshCompromisedPasswordsImpl): RefreshCompromisedPasswords
+
+    @Binds
+    abstract fun bindImportVaultUseCase(impl: ImportVaultUseCaseImpl): ImportVaultUseCase
 
 }
