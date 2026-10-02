@@ -18,20 +18,24 @@
 
 package proton.android.pass.features.importation.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import proton.android.pass.data.api.usecases.ImportVaultUseCase
+import proton.android.pass.features.importation.R
 import java.net.URI
 import javax.inject.Inject
 
 @HiltViewModel
 class ImportationViewModel @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val importVaultUseCase: ImportVaultUseCase
 ) : ViewModel() {
 
@@ -113,7 +117,8 @@ class ImportationViewModel @Inject constructor(
                             _state.update {
                                 it.copy(
                                     isLoading = false,
-                                    passwordError = error.localizedMessage ?: "Import failed"
+                                    passwordError = error.localizedMessage
+                                        ?: context.getString(R.string.importation_error_generic)
                                 )
                             }
                         }

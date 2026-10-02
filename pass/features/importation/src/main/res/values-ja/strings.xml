@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">インポート</string>
+    <string name="importation_file_label">ファイル</string>
+    <string name="importation_file_placeholder">ファイルを選択</string>
+    <string name="importation_master_password_label">マスターパスワード</string>
+    <string name="importation_master_password_placeholder">マスターパスワードを入力</string>
+    <string name="importation_next_button">次へ</string>
+    <string name="importation_action_conceal_password">パスワードを非表示</string>
+    <string name="importation_action_reveal_password">パスワードを表示</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">インポート</string>
+    <string name="importation_error_generic">インポートに失敗しました</string>
+</resources>

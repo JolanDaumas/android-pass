@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importera</string>
+    <string name="importation_file_label">Fil</string>
+    <string name="importation_file_placeholder">Välj en fil</string>
+    <string name="importation_master_password_label">Huvudlösenord</string>
+    <string name="importation_master_password_placeholder">Ange ditt huvudlösenord</string>
+    <string name="importation_next_button">Nästa</string>
+    <string name="importation_action_conceal_password">Dölj lösenord</string>
+    <string name="importation_action_reveal_password">Visa lösenord</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importera</string>
+    <string name="importation_error_generic">Det gick inte att importera</string>
+</resources>

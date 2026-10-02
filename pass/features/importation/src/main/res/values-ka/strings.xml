@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">იმპორტი</string>
+    <string name="importation_file_label">ფაილი</string>
+    <string name="importation_file_placeholder">აირჩიეთ ფაილი</string>
+    <string name="importation_master_password_label">მთავარი პაროლი</string>
+    <string name="importation_master_password_placeholder">შეიყვანეთ მთავარი პაროლი</string>
+    <string name="importation_next_button">შემდეგი</string>
+    <string name="importation_action_conceal_password">პაროლის დამალვა</string>
+    <string name="importation_action_reveal_password">პაროლის ჩვენება</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">იმპორტი</string>
+    <string name="importation_error_generic">იმპორტი ვერ მოხერხდა</string>
+</resources>

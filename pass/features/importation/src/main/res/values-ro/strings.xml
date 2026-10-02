@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importă</string>
+    <string name="importation_file_label">Fișier</string>
+    <string name="importation_file_placeholder">Selectează un fișier</string>
+    <string name="importation_master_password_label">Parola principală</string>
+    <string name="importation_master_password_placeholder">Introdu parola principală</string>
+    <string name="importation_next_button">Înainte</string>
+    <string name="importation_action_conceal_password">Ascunde parola</string>
+    <string name="importation_action_reveal_password">Afișează parola</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importă</string>
+    <string name="importation_error_generic">Importul a eșuat</string>
+</resources>

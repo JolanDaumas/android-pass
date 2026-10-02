@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importació</string>
+    <string name="importation_file_label">Fitxer</string>
+    <string name="importation_file_placeholder">Selecciona un fitxer</string>
+    <string name="importation_master_password_label">Contrasenya mestra</string>
+    <string name="importation_master_password_placeholder">Introdueix la contrasenya mestra</string>
+    <string name="importation_next_button">Següent</string>
+    <string name="importation_action_conceal_password">Amaga la contrasenya</string>
+    <string name="importation_action_reveal_password">Mostra la contrasenya</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importa</string>
+    <string name="importation_error_generic">No s’ha pogut importar</string>
+</resources>

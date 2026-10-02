@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Импорт</string>
+    <string name="importation_file_label">Файл</string>
+    <string name="importation_file_placeholder">Выберите файл</string>
+    <string name="importation_master_password_label">Главный пароль</string>
+    <string name="importation_master_password_placeholder">Введите главный пароль</string>
+    <string name="importation_next_button">Далее</string>
+    <string name="importation_action_conceal_password">Скрыть пароль</string>
+    <string name="importation_action_reveal_password">Показать пароль</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Импортировать</string>
+    <string name="importation_error_generic">Не удалось выполнить импорт</string>
+</resources>

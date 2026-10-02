@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Uvozi</string>
+    <string name="importation_file_label">Datoteka</string>
+    <string name="importation_file_placeholder">Izberite datoteko</string>
+    <string name="importation_master_password_label">Glavno geslo</string>
+    <string name="importation_master_password_placeholder">Vnesite glavno geslo</string>
+    <string name="importation_next_button">Naprej</string>
+    <string name="importation_action_conceal_password">Skrij geslo</string>
+    <string name="importation_action_reveal_password">Pokaži geslo</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Uvozi</string>
+    <string name="importation_error_generic">Uvoz ni uspel</string>
+</resources>

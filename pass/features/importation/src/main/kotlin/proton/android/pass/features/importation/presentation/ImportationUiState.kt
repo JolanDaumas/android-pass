@@ -23,7 +23,6 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class ImportationUiState(
-    val title: String = "Importation",
     val step: ImportationStep = ImportationStep.InputCredentials,
     val selectedFileUri: Uri? = null,
     val selectedFileName: String? = null,

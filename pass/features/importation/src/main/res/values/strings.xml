@@ -18,15 +18,15 @@
   -->
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="importation_title">Importation</string>
-    <string name="importation_file_label">Fichier</string>
-    <string name="importation_file_placeholder">Sélectionner un fichier</string>
-    <string name="importation_master_password_label">Mot de passe maître</string>
-    <string name="importation_master_password_placeholder">Saisir le mot de passe maître</string>
-    <string name="importation_submit_button">Importer</string>
-    <string name="importation_next_button">Suivant</string>
-    <string name="importation_action_conceal_password">Masquer le mot de passe</string>
-    <string name="importation_action_reveal_password">Afficher le mot de passe</string>
-    <string name="importation_selection_title">Sélectionner les éléments</string>
-    <string name="importation_confirm_button">Importer</string>
+    <string name="importation_title">Import</string>
+    <string name="importation_file_label">File</string>
+    <string name="importation_file_placeholder">Select a file</string>
+    <string name="importation_master_password_label">Master password</string>
+    <string name="importation_master_password_placeholder">Enter your master password</string>
+    <string name="importation_next_button">Next</string>
+    <string name="importation_action_conceal_password">Hide password</string>
+    <string name="importation_action_reveal_password">Show password</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Import</string>
+    <string name="importation_error_generic">Import failed</string>
 </resources>

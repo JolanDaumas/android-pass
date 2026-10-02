@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">匯入</string>
+    <string name="importation_file_label">檔案</string>
+    <string name="importation_file_placeholder">選取檔案</string>
+    <string name="importation_master_password_label">主要密碼</string>
+    <string name="importation_master_password_placeholder">輸入主要密碼</string>
+    <string name="importation_next_button">下一步</string>
+    <string name="importation_action_conceal_password">隱藏密碼</string>
+    <string name="importation_action_reveal_password">顯示密碼</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">匯入</string>
+    <string name="importation_error_generic">匯入失敗</string>
+</resources>
