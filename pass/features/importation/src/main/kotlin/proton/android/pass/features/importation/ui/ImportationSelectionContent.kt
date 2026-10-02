@@ -20,7 +20,6 @@ package proton.android.pass.features.importation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,21 +27,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import me.proton.core.compose.theme.ProtonTheme
 import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Bold
-import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
 import proton.android.pass.composecomponents.impl.buttons.LoadingCircleButton
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
@@ -52,7 +46,8 @@ import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationUiState
 import proton.android.pass.features.importation.presentation.SelectableEntry
 import proton.android.pass.features.importation.presentation.SelectableGroup
-import me.proton.core.presentation.R as CoreR
+import proton.android.pass.features.importation.ui.components.SelectableEntryItem
+import proton.android.pass.features.importation.ui.components.SelectableGroupItem
 
 @Composable
 fun ImportationSelectionContent(
@@ -124,87 +119,29 @@ fun ImportationSelectionContent(
     }
 }
 
+@Preview
 @Composable
-fun SelectableGroupItem(
-    group: SelectableGroup,
-    onEvent: (ImportationUiEvent) -> Unit,
-    depth: Int
-) {
-    Column(modifier = Modifier.fillMaxWidth().padding(start = (depth * 16).dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Spacing.extraSmall),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small)
-        ) {
-            Icon(
-                painter = painterResource(CoreR.drawable.ic_proton_folder),
-                contentDescription = null,
-                tint = ProtonTheme.colors.iconNorm
-            )
-            Text(
-                text = group.name,
-                style = PassTheme.typography.body3Norm(),
-                color = ProtonTheme.colors.textNorm,
-                modifier = Modifier.weight(1f)
-            )
-            Checkbox(
-                checked = group.isSelected,
-                onCheckedChange = { isChecked ->
-                    onEvent(ImportationUiEvent.OnToggleGroupSelection(group.uuid, isChecked))
-                }
-            )
-        }
-
-        group.groups.forEach { subGroup ->
-            SelectableGroupItem(group = subGroup, onEvent = onEvent, depth = depth + 1)
-        }
-
-        group.entries.forEach { entry ->
-            SelectableEntryItem(entry = entry, onEvent = onEvent, depth = depth + 1)
-        }
-    }
-}
-
-@Composable
-fun SelectableEntryItem(
-    entry: SelectableEntry,
-    onEvent: (ImportationUiEvent) -> Unit,
-    depth: Int
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = (depth * 16).dp)
-            .padding(vertical = Spacing.extraSmall),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.small)
-    ) {
-        Icon(
-            painter = painterResource(CoreR.drawable.ic_proton_key),
-            contentDescription = null,
-            tint = ProtonTheme.colors.iconNorm
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entry.title.ifEmpty { "Untitled" },
-                style = PassTheme.typography.body3Norm(),
-                color = ProtonTheme.colors.textNorm
-            )
-            if (entry.userName.isNotEmpty()) {
-                Text(
-                    text = entry.userName,
-                    style = PassTheme.typography.body3Norm(),
-                    color = ProtonTheme.colors.textWeak
+private fun ImportationSelectionContentPreview() {
+    PassTheme {
+        ImportationSelectionContent(
+            state = ImportationUiState(
+                vaultName = "My KeePass Vault",
+                selectableGroups = listOf(
+                    SelectableGroup(
+                        uuid = "1",
+                        name = "Social",
+                        isSelected = true,
+                        entries = listOf(
+                            SelectableEntry(uuid = "2", title = "Twitter", userName = "user", isSelected = true)
+                        )
+                    )
+                ),
+                selectableEntries = listOf(
+                    SelectableEntry(uuid = "3", title = "Bank", userName = "client", isSelected = true)
                 )
-            }
-        }
-        Checkbox(
-            checked = entry.isSelected,
-            onCheckedChange = { isChecked ->
-                onEvent(ImportationUiEvent.OnToggleEntrySelection(entry.uuid, isChecked))
-            }
+            ),
+            onEvent = {},
+            onBackClick = {}
         )
     }
 }
