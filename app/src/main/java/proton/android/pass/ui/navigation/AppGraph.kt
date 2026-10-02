@@ -191,6 +191,9 @@ import proton.android.pass.features.profile.PinConfig
 import proton.android.pass.features.profile.ProfileNavItem
 import proton.android.pass.features.profile.ProfileNavigation
 import proton.android.pass.features.profile.manageaccountconfirmation.navigation.ManageAccountConfirmationNavItem
+import proton.android.pass.features.importation.navigation.ImportationNavDestination
+import proton.android.pass.features.importation.navigation.ImportationNavItem
+import proton.android.pass.features.importation.navigation.importationNavGraph
 import proton.android.pass.features.profile.profileGraph
 import proton.android.pass.features.report.navigation.ReportNavDestination
 import proton.android.pass.features.report.navigation.ReportNavItem
@@ -1015,9 +1018,14 @@ fun NavGraphBuilder.appGraph(
 
                 ProfileNavigation.StorageFull -> appNavigator.navigate(StorageFullNavItem)
 
-                ProfileNavigation.Import -> {
-                    Log.d("DEBUG", "appGraph: Import clicked")
-                }
+                ProfileNavigation.Import -> appNavigator.navigate(ImportationNavItem)
+            }
+        }
+    )
+    importationNavGraph(
+        onNavigated = { destination ->
+            when (destination) {
+                ImportationNavDestination.CloseScreen -> appNavigator.navigateBack()
             }
         }
     )
