@@ -86,6 +86,22 @@ fun ImportationContent(
         topBar = {
             BackArrowTopAppBar(
                 title = stringResource(R.string.importation_title),
+                actions = {
+                    LoadingCircleButton(
+                        modifier = Modifier.padding(end = Spacing.small),
+                        color = PassTheme.colors.interactionNormMajor2,
+                        isLoading = state.isLoading,
+                        buttonEnabled = state.isSubmitEnabled,
+                        onClick = { onEvent(ImportationUiEvent.OnSubmit) },
+                        text = {
+                            Text(
+                                text = stringResource(R.string.importation_next_button),
+                                style = PassTheme.typography.body3Bold(),
+                                color = PassTheme.colors.interactionNormMinor1
+                            )
+                        }
+                    )
+                },
                 onUpClick = onBackClick
             )
         }
@@ -221,24 +237,6 @@ fun ImportationContent(
                 isError = state.passwordError != null,
                 errorMessage = state.passwordError.orEmpty()
             )
-
-            Spacer(modifier = Modifier.height(Spacing.small))
-
-            // Submit / Import button
-            LoadingCircleButton(
-                modifier = Modifier.fillMaxWidth(),
-                color = PassTheme.colors.interactionNormMajor2,
-                isLoading = state.isLoading,
-                buttonEnabled = state.isSubmitEnabled,
-                onClick = { onEvent(ImportationUiEvent.OnSubmit) },
-                text = {
-                    Text(
-                        text = stringResource(R.string.importation_submit_button),
-                        style = PassTheme.typography.body3Bold(),
-                        color = PassTheme.colors.interactionNormMinor1
-                    )
-                }
-            )
         }
     }
 }
@@ -269,4 +267,3 @@ private fun ImportationContentPreview() {
         )
     }
 }
-
