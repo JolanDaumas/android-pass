@@ -31,13 +31,22 @@ data class ImportationUiState(
     val isLoading: Boolean = false,
     val fileError: String? = null,
     val passwordError: String? = null,
+    val importError: String? = null,
+    val isImportComplete: Boolean = false,
     val vaultName: String? = null,
     val selectableGroups: List<SelectableGroup> = emptyList(),
     val selectableEntries: List<SelectableEntry> = emptyList()
 ) {
+    val selectedEntryCount: Int
+        get() = selectableEntries.count { it.isSelected } +
+            selectableGroups.sumOf { it.selectedEntryCount() }
+
     val isSubmitEnabled: Boolean
         get() = when (step) {
             ImportationStep.InputCredentials -> selectedFileUri != null && masterPassword.isNotBlank() && !isLoading
-            ImportationStep.SelectItems -> !isLoading
+            ImportationStep.SelectItems -> selectedEntryCount > 0 && !isLoading
         }
 }
+
+private fun SelectableGroup.selectedEntryCount(): Int =
+    entries.count { it.isSelected } + groups.sumOf { it.selectedEntryCount() }

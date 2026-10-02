@@ -38,6 +38,7 @@ import me.proton.core.compose.theme.ProtonTheme
 import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Bold
+import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
 import proton.android.pass.composecomponents.impl.buttons.LoadingCircleButton
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
@@ -102,6 +103,14 @@ fun ImportationSelectionContent(
                     color = ProtonTheme.colors.textNorm
                 )
                 Spacer(modifier = Modifier.height(Spacing.extraSmall))
+            }
+
+            state.importError?.let { error ->
+                Text(
+                    text = error,
+                    style = PassTheme.typography.body3Norm(),
+                    color = ProtonTheme.colors.notificationError
+                )
             }
 
             Column(

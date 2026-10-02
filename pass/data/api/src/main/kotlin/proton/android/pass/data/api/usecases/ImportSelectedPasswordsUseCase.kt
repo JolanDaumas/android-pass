@@ -16,9 +16,10 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.navigation
+package proton.android.pass.data.api.usecases
 
-sealed interface ImportationNavDestination {
-    data object CloseScreen : ImportationNavDestination
-    data object ShowImportSuccess : ImportationNavDestination
+import proton.android.pass.domain.ImportedEntry
+
+interface ImportSelectedPasswordsUseCase {
+    suspend operator fun invoke(entries: List<ImportedEntry>): Result<Unit>
 }

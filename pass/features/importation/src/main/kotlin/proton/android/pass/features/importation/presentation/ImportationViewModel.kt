@@ -28,7 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import proton.android.pass.data.api.usecases.ImportSelectedPasswordsUseCase
 import proton.android.pass.data.api.usecases.ImportVaultUseCase
+import proton.android.pass.domain.ImportedEntry
+import proton.android.pass.domain.ImportedGroup
+import proton.android.pass.domain.ImportedVault
 import proton.android.pass.features.importation.R
 import java.net.URI
 import javax.inject.Inject
@@ -36,11 +40,13 @@ import javax.inject.Inject
 @HiltViewModel
 class ImportationViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val importVaultUseCase: ImportVaultUseCase
+    private val importVaultUseCase: ImportVaultUseCase,
+    private val importSelectedPasswordsUseCase: ImportSelectedPasswordsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ImportationUiState())
     val state: StateFlow<ImportationUiState> = _state.asStateFlow()
+    private var importedEntriesByUuid: Map<String, ImportedEntry> = emptyMap()
 
     fun onEvent(event: ImportationUiEvent) {
         when (event) {
@@ -49,9 +55,11 @@ class ImportationViewModel @Inject constructor(
                     it.copy(
                         selectedFileUri = event.uri,
                         selectedFileName = event.fileName,
-                        fileError = null
+                        fileError = null,
+                        importError = null
                     )
                 }
+                importedEntriesByUuid = emptyMap()
             }
 
             is ImportationUiEvent.OnPasswordChange -> {
@@ -96,13 +104,22 @@ class ImportationViewModel @Inject constructor(
             }
 
             ImportationUiEvent.OnSubmit -> {
+                if (_state.value.isLoading) return
                 val uri = _state.value.selectedFileUri ?: return
                 val password = _state.value.masterPassword
                 viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true, fileError = null, passwordError = null) }
-                    val result = importVaultUseCase(java.net.URI(uri.toString()), password)
+                    _state.update {
+                        it.copy(
+                            isLoading = true,
+                            fileError = null,
+                            passwordError = null,
+                            importError = null
+                        )
+                    }
+                    val result = importVaultUseCase(URI(uri.toString()), password)
                     result.fold(
                         onSuccess = { vault ->
+                            importedEntriesByUuid = vault.allEntries().associateBy(ImportedEntry::uuid)
                             _state.update {
                                 it.copy(
                                     isLoading = false,
@@ -127,10 +144,32 @@ class ImportationViewModel @Inject constructor(
             }
 
             ImportationUiEvent.OnConfirmSelection -> {
+                val currentState = _state.value
+                if (currentState.isLoading || !currentState.isSubmitEnabled) return
+                val selectedEntries = currentState.selectableEntries()
+                    .filter(SelectableEntry::isSelected)
+                    .mapNotNull { importedEntriesByUuid[it.uuid] }
                 viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true) }
-                    // Final import action using selected items
-                    _state.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isLoading = true, importError = null) }
+                    importSelectedPasswordsUseCase(selectedEntries).fold(
+                        onSuccess = {
+                            importedEntriesByUuid = emptyMap()
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isImportComplete = true
+                                )
+                            }
+                        },
+                        onFailure = {
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    importError = context.getString(R.string.importation_error_import)
+                                )
+                            }
+                        }
+                    )
                 }
             }
 
@@ -176,4 +215,16 @@ class ImportationViewModel @Inject constructor(
             entries = group.entries.map { it.copy(isSelected = isSelected) }
         )
     }
+
+    private fun ImportedVault.allEntries(): List<ImportedEntry> =
+        entries + groups.flatMap { it.allEntries() }
+
+    private fun ImportedGroup.allEntries(): List<ImportedEntry> =
+        entries + groups.flatMap { it.allEntries() }
+
+    private fun ImportationUiState.selectableEntries(): List<SelectableEntry> =
+        selectableEntries + selectableGroups.flatMap { it.allEntries() }
+
+    private fun SelectableGroup.allEntries(): List<SelectableEntry> =
+        entries + groups.flatMap { it.allEntries() }
 }

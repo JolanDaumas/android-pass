@@ -63,6 +63,9 @@
     <string name="home_item_invite_card_title">Shared item invitation</string>
     <string name="home_vault_invite_card_title">Shared vault invitation</string>
     <string name="home_vault_invite_banner_body" comment="placeholder is replaced by an email address">%s wants to share a vault with you.</string>
+    <string name="home_import_success_title">Import complete</string>
+    <string name="home_import_success_message">Your selected passwords were imported successfully.</string>
+    <string name="home_import_success_close">Close</string>
     <!-- Common bottomsheet -->
     <string name="bottomsheet_copy_password">Copy password</string>
     <string name="bottomsheet_copy_username">Copy username</string>

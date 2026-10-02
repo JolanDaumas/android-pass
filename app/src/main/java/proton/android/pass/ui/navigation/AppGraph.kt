@@ -67,6 +67,7 @@ import proton.android.pass.features.featureflags.FeatureFlagRoute
 import proton.android.pass.features.featureflags.featureFlagsGraph
 import proton.android.pass.features.home.HOME_ENABLE_BULK_ACTIONS_KEY
 import proton.android.pass.features.home.HomeNavItem
+import proton.android.pass.features.home.HomeImportSuccessBottomSheetNavItem
 import proton.android.pass.features.home.HomeNavigation
 import proton.android.pass.features.home.HomeUpgradeDialog
 import proton.android.pass.features.home.homeGraph
@@ -374,6 +375,7 @@ fun NavGraphBuilder.appGraph(
                 }
 
                 HomeNavigation.CloseScreen -> appNavigator.navigateBack()
+                HomeNavigation.CloseImportSuccessBottomSheet -> appNavigator.navigateBack()
 
                 HomeNavigation.CreateVault -> {
                     appNavigator.navigate(
@@ -1026,6 +1028,10 @@ fun NavGraphBuilder.appGraph(
         onNavigated = { destination ->
             when (destination) {
                 ImportationNavDestination.CloseScreen -> appNavigator.navigateBack()
+                ImportationNavDestination.ShowImportSuccess -> appNavigator.navigate(
+                    destination = HomeImportSuccessBottomSheetNavItem,
+                    backDestination = HomeNavItem
+                )
             }
         }
     )
