@@ -44,6 +44,21 @@ fun ImportationScreen(
     viewModel: ImportationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val handleEvent: (ImportationUiEvent) -> Unit = { event ->
+        when (event) {
+            is ImportationUiEvent.OnFileSelected ->
+                viewModel.onFileSelected(event.uri, event.fileName)
+            is ImportationUiEvent.OnPasswordChange ->
+                viewModel.onPasswordChange(event.password)
+            is ImportationUiEvent.OnTogglePasswordVisibility ->
+                viewModel.onTogglePasswordVisibility(event.isVisible)
+            is ImportationUiEvent.OnToggleEntrySelection ->
+                viewModel.onToggleEntrySelection(event.uuid, event.isSelected)
+            ImportationUiEvent.OnSubmit -> viewModel.onSubmit()
+            ImportationUiEvent.OnConfirmSelection -> viewModel.onConfirmSelection()
+            ImportationUiEvent.OnBackStep -> viewModel.onBackStep()
+        }
+    }
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true,
@@ -81,7 +96,7 @@ fun ImportationScreen(
                     ImportationContent(
                         modifier = modifier,
                         state = state,
-                        onEvent = viewModel::onEvent,
+                        onEvent = handleEvent,
                         onBackClick = { onNavigated(ImportationNavDestination.CloseScreen) }
                     )
                 }
@@ -90,8 +105,8 @@ fun ImportationScreen(
                     ImportationSelectionContent(
                         modifier = modifier,
                         state = state,
-                        onEvent = viewModel::onEvent,
-                        onBackClick = { viewModel.onEvent(ImportationUiEvent.OnBackStep) }
+                        onEvent = handleEvent,
+                        onBackClick = viewModel::onBackStep
                     )
                 }
             }

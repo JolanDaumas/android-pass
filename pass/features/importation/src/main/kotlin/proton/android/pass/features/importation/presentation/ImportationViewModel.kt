@@ -74,171 +74,168 @@ class ImportationViewModel @Inject constructor(
         initialValue = ImportationUiState()
     )
 
-    fun onEvent(event: ImportationUiEvent) {
-        when (event) {
-            is ImportationUiEvent.OnFileSelected -> {
-                fileState.update {
-                    it.copy(
-                        uri = event.uri,
-                        name = event.fileName,
-                        error = null
-                    )
+    fun onFileSelected(uri: Uri, fileName: String?) {
+        fileState.update {
+            it.copy(
+                uri = uri,
+                name = fileName,
+                error = null
+            )
+        }
+        entriesState.update {
+            it.copy(selectable = emptyList(), progress = emptyList())
+        }
+    }
+
+    fun onPasswordChange(password: String) {
+        credentialsState.update {
+            it.copy(
+                password = password,
+                error = null
+            )
+        }
+    }
+
+    fun onTogglePasswordVisibility(isVisible: Boolean) {
+        credentialsState.update {
+            it.copy(isPasswordVisible = isVisible)
+        }
+    }
+
+    fun onToggleEntrySelection(uuid: String, isSelected: Boolean) {
+        entriesState.update { state ->
+            state.copy(
+                selectable = state.selectable.map { entry ->
+                    if (entry.uuid == uuid) entry.copy(isSelected = isSelected) else entry
                 }
-                entriesState.update {
-                    it.copy(selectable = emptyList(), progress = emptyList())
-                }
+            )
+        }
+    }
+
+    fun onSubmit() {
+        if (importState.value.isLoading) return
+        val uri = fileState.value.uri ?: return
+        val password = credentialsState.value.password
+        viewModelScope.launch {
+            importState.update {
+                it.copy(isLoading = true, error = null)
             }
-
-            is ImportationUiEvent.OnPasswordChange -> {
-                credentialsState.update {
-                    it.copy(
-                        password = event.password,
-                        error = null
-                    )
-                }
-            }
-
-            is ImportationUiEvent.OnTogglePasswordVisibility -> {
-                credentialsState.update {
-                    it.copy(isPasswordVisible = event.isVisible)
-                }
-            }
-
-            is ImportationUiEvent.OnToggleEntrySelection -> {
-                entriesState.update { state ->
-                    state.copy(
-                        selectable = state.selectable.map { entry ->
-                            if (entry.uuid == event.uuid) entry.copy(isSelected = event.isSelected) else entry
-                        }
-                    )
-                }
-            }
-
-            ImportationUiEvent.OnSubmit -> {
-                if (importState.value.isLoading) return
-                val uri = fileState.value.uri ?: return
-                val password = credentialsState.value.password
-                viewModelScope.launch {
-                    importState.update {
-                        it.copy(isLoading = true, error = null)
-                    }
-                    fileState.update { it.copy(error = null) }
-                    credentialsState.update { it.copy(error = null) }
-                    extractVaultUseCase(URI(uri.toString()), password)
-                        .fold(
-                            onSuccess = { entries ->
-                                val selectableEntries =
-                                    encryptionContextProvider.withEncryptionContext {
-                                        entries.extractedItems.toUiModel(::decrypt)
-                                    }
-
-                                importState.update {
-                                    it.copy(isLoading = false, step = ImportationStep.SelectItems)
-                                }
-                                entriesState.update {
-                                    it.copy(selectable = selectableEntries)
-                                }
-                            },
-                            onFailure = { error ->
-                                importState.update { it.copy(isLoading = false) }
-                                credentialsState.update {
-                                    it.copy(
-                                        error = error.localizedMessage
-                                            ?.let(ImportationUiError::Message)
-                                            ?: ImportationUiError.Generic
-                                    )
-                                }
+            fileState.update { it.copy(error = null) }
+            credentialsState.update { it.copy(error = null) }
+            extractVaultUseCase(URI(uri.toString()), password)
+                .fold(
+                    onSuccess = { entries ->
+                        val selectableEntries =
+                            encryptionContextProvider.withEncryptionContext {
+                                entries.extractedItems.toUiModel(::decrypt)
                             }
-                        )
-                }
+
+                        importState.update {
+                            it.copy(isLoading = false, step = ImportationStep.SelectItems)
+                        }
+                        entriesState.update {
+                            it.copy(selectable = selectableEntries)
+                        }
+                    },
+                    onFailure = { error ->
+                        importState.update { it.copy(isLoading = false) }
+                        credentialsState.update {
+                            it.copy(
+                                error = error.localizedMessage
+                                    ?.let(ImportationUiError::Message)
+                                    ?: ImportationUiError.Generic
+                            )
+                        }
+                    }
+                )
+        }
+    }
+
+    fun onConfirmSelection() {
+        viewModelScope.launch {
+            val entries = encryptionContextProvider.withEncryptionContext {
+                entriesState.value.selectable
+                    .filter(SelectableEntryUiModel::isSelected)
+                    .toDomain(::encrypt)
             }
 
-            ImportationUiEvent.OnConfirmSelection ->
-                viewModelScope.launch {
-                    val entries = encryptionContextProvider.withEncryptionContext {
-                        entriesState.value.selectable
-                            .filter(SelectableEntryUiModel::isSelected)
-                            .toDomain(::encrypt)
-                    }
-
-                    importVaultUseCase(entries)
-                        .collect { result ->
-                            when (result) {
-                                ImportVaultResult.Started -> {
-                                    importState.update {
-                                        it.copy(
-                                            step = ImportationStep.UploadEntries,
-                                            isLoading = true,
-                                            error = null
+            importVaultUseCase(entries)
+                .collect { result ->
+                    when (result) {
+                        ImportVaultResult.Started -> {
+                            importState.update {
+                                it.copy(
+                                    step = ImportationStep.UploadEntries,
+                                    isLoading = true,
+                                    error = null
+                                )
+                            }
+                            entriesState.update {
+                                it.copy(
+                                    progress = entries.map { entry ->
+                                        ImportProgressEntry(
+                                            uuid = entry.uuid
                                         )
                                     }
-                                    entriesState.update {
-                                        it.copy(
-                                            progress = entries.map { entry ->
-                                                ImportProgressEntry(
-                                                    uuid = entry.uuid
-                                                )
-                                            }
-                                        )
-                                    }
-                                }
-
-                                is ImportVaultResult.Uploading ->
-                                    updateImportProgress(
-                                        result.uuid,
-                                        ImportProgressStatus.Uploading
-                                    )
-
-                                is ImportVaultResult.ItemImported ->
-                                    updateImportProgress(result.uuid, ImportProgressStatus.Imported)
-
-                                ImportVaultResult.Imported -> {
-                                    importState.update {
-                                        it.copy(isLoading = false, isComplete = true)
-                                    }
-                                    entriesState.update { state ->
-                                        state.copy(
-                                            progress = state.progress.map {
-                                                it.copy(status = ImportProgressStatus.Imported)
-                                            }
-                                        )
-                                    }
-                                }
-
-                                ImportVaultResult.Failed -> {
-                                    importState.update {
-                                        it.copy(
-                                            step = ImportationStep.SelectItems,
-                                            isLoading = false,
-                                            error = ImportationUiError.ImportFailed
-                                        )
-                                    }
-                                    entriesState.update { state ->
-                                        state.copy(progress = state.progress.map { progressEntry ->
-                                            if (progressEntry.status == ImportProgressStatus.Imported) {
-                                                progressEntry
-                                            } else {
-                                                progressEntry.copy(status = ImportProgressStatus.Failed)
-                                            }
-                                        })
-                                    }
-                                }
+                                )
                             }
                         }
-                }
 
-            ImportationUiEvent.OnBackStep -> {
-                if (importState.value.isLoading) return
-                importState.update {
-                    it.copy(
-                        step = when (it.step) {
-                            ImportationStep.InputCredentials -> ImportationStep.InputCredentials
-                            ImportationStep.SelectItems -> ImportationStep.InputCredentials
-                            ImportationStep.UploadEntries -> ImportationStep.SelectItems
+                        is ImportVaultResult.Uploading ->
+                            updateImportProgress(
+                                result.uuid,
+                                ImportProgressStatus.Uploading
+                            )
+
+                        is ImportVaultResult.ItemImported ->
+                            updateImportProgress(result.uuid, ImportProgressStatus.Imported)
+
+                        ImportVaultResult.Imported -> {
+                            importState.update {
+                                it.copy(isLoading = false, isComplete = true)
+                            }
+                            entriesState.update { state ->
+                                state.copy(
+                                    progress = state.progress.map {
+                                        it.copy(status = ImportProgressStatus.Imported)
+                                    }
+                                )
+                            }
                         }
-                    )
+
+                        ImportVaultResult.Failed -> {
+                            importState.update {
+                                it.copy(
+                                    step = ImportationStep.SelectItems,
+                                    isLoading = false,
+                                    error = ImportationUiError.ImportFailed
+                                )
+                            }
+                            entriesState.update { state ->
+                                state.copy(progress = state.progress.map { progressEntry ->
+                                    if (progressEntry.status == ImportProgressStatus.Imported) {
+                                        progressEntry
+                                    } else {
+                                        progressEntry.copy(status = ImportProgressStatus.Failed)
+                                    }
+                                })
+                            }
+                        }
+                    }
                 }
-            }
+        }
+    }
+
+    fun onBackStep() {
+        if (importState.value.isLoading) return
+        importState.update {
+            it.copy(
+                step = when (it.step) {
+                    ImportationStep.InputCredentials -> ImportationStep.InputCredentials
+                    ImportationStep.SelectItems -> ImportationStep.InputCredentials
+                    ImportationStep.UploadEntries -> ImportationStep.SelectItems
+                }
+            )
         }
     }
 
