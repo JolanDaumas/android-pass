@@ -27,7 +27,6 @@ import javax.inject.Inject
 class ExtractVaultUseCaseImpl @Inject constructor(
     private val vaultExtractionRepository: VaultExtractionRepository
 ) : ExtractVaultUseCase {
-    override suspend fun invoke(uri: URI, masterPassword: String): Result<ExtractedVault> {
-        return vaultExtractionRepository.extractVault(uri, masterPassword)
-    }
+    override suspend fun invoke(uri: URI, masterPassword: String): Result<ExtractedVault> =
+        vaultExtractionRepository.extractVault(uri, masterPassword)
 }
