@@ -18,6 +18,7 @@
 
 package proton.android.pass.features.importation.ui
 
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -45,12 +46,16 @@ fun ImportationScreen(
         when (event) {
             is ImportationUiEvent.OnFileSelected ->
                 viewModel.onFileSelected(event.uri, event.fileName)
+
             is ImportationUiEvent.OnPasswordChange ->
                 viewModel.onPasswordChange(event.password)
+
             is ImportationUiEvent.OnTogglePasswordVisibility ->
                 viewModel.onTogglePasswordVisibility(event.isVisible)
+
             is ImportationUiEvent.OnToggleEntrySelection ->
                 viewModel.onToggleEntrySelection(event.uuid, event.isSelected)
+
             ImportationUiEvent.OnSubmit -> viewModel.onSubmit()
             ImportationUiEvent.OnConfirmSelection -> viewModel.onConfirmSelection()
             ImportationUiEvent.OnBackStep -> viewModel.onBackStep()
@@ -79,6 +84,7 @@ fun ImportationScreen(
     }
 
     PassModalBottomSheetLayout(
+        modifier = modifier.navigationBarsPadding(),
         sheetState = sheetState,
         sheetContent = {
             if (state.step == ImportationStep.UploadEntries) {
@@ -87,7 +93,6 @@ fun ImportationScreen(
         },
         content = {
             ImportationScreenContent(
-                modifier = modifier,
                 state = state,
                 onEvent = handleEvent,
                 onClose = { onNavigated(ImportationNavDestination.CloseScreen) }

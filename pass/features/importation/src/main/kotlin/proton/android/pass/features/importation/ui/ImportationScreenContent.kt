@@ -114,6 +114,7 @@ fun ImportationScreenContent(
                     isSubmitEnabled = state.isSubmitEnabled,
                     onEvent = onEvent
                 )
+
                 ImportationStep.SelectItems,
                 ImportationStep.UploadEntries -> ImportationSelectionContent(
                     selectedFileName = state.selectedFileName,
