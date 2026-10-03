@@ -18,28 +18,16 @@
 
 package proton.android.pass.features.importation.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import proton.android.pass.commonui.api.PassTheme
-import proton.android.pass.commonui.api.Spacing
-import proton.android.pass.commonui.api.body3Bold
 import proton.android.pass.composecomponents.impl.bottomsheet.PassModalBottomSheetLayout
-import proton.android.pass.composecomponents.impl.buttons.LoadingCircleButton
-import proton.android.pass.composecomponents.impl.topbar.BackArrowTopAppBar
-import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.navigation.ImportationNavDestination
 import proton.android.pass.features.importation.presentation.ImportationStep
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
@@ -98,76 +86,12 @@ fun ImportationScreen(
             }
         },
         content = {
-            Scaffold(
-                modifier = modifier.fillMaxSize(),
-                topBar = {
-                    val isInputStep = state.step == ImportationStep.InputCredentials
-                    BackArrowTopAppBar(
-                        title = stringResource(
-                            if (isInputStep) {
-                                R.string.importation_title
-                            } else {
-                                R.string.importation_selection_title
-                            }
-                        ),
-                        actions = {
-                            LoadingCircleButton(
-                                modifier = Modifier.padding(end = Spacing.small),
-                                color = PassTheme.colors.interactionNormMajor2,
-                                isLoading = state.isLoading,
-                                buttonEnabled = state.isSubmitEnabled,
-                                onClick = {
-                                    handleEvent(
-                                        if (isInputStep) {
-                                            ImportationUiEvent.OnSubmit
-                                        } else {
-                                            ImportationUiEvent.OnConfirmSelection
-                                        }
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = stringResource(
-                                            if (isInputStep) {
-                                                R.string.importation_next_button
-                                            } else {
-                                                R.string.importation_confirm_button
-                                            }
-                                        ),
-                                        style = PassTheme.typography.body3Bold(),
-                                        color = PassTheme.colors.interactionNormMinor1
-                                    )
-                                }
-                            )
-                        },
-                        onUpClick = {
-                            if (isInputStep) {
-                                onNavigated(ImportationNavDestination.CloseScreen)
-                            } else {
-                                viewModel.onBackStep()
-                            }
-                        }
-                    )
-                }
-            ) { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    when (state.step) {
-                        ImportationStep.InputCredentials -> ImportationContent(
-                            state = state,
-                            onEvent = handleEvent
-                        )
-                        ImportationStep.SelectItems,
-                        ImportationStep.UploadEntries -> ImportationSelectionContent(
-                            state = state,
-                            onEvent = handleEvent
-                        )
-                    }
-                }
-            }
+            ImportationScreenContent(
+                modifier = modifier,
+                state = state,
+                onEvent = handleEvent,
+                onClose = { onNavigated(ImportationNavDestination.CloseScreen) }
+            )
         }
     )
 }

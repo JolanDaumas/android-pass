@@ -21,5 +21,8 @@ package proton.android.pass.features.importation.presentation
 enum class ImportationStep {
     InputCredentials,
     SelectItems,
-    UploadEntries
+    UploadEntries;
+
+    val isInputStep: Boolean
+        get() = this == InputCredentials
 }
