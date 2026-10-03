@@ -57,7 +57,7 @@ class ImportVaultUseCaseImpl @Inject constructor(
         val imports = entries.mapIndexed { index, extractedItem ->
             val uuid = extractedItem.uuid
             val progress = index.toFloat() / entries.size
-            send(ImportVaultResult.Uploading(uuid, progress))
+            send(ImportVaultResult.Uploading(uuid))
 
             async {
                 createItem(
@@ -65,7 +65,7 @@ class ImportVaultUseCaseImpl @Inject constructor(
                     folderId = folderId,
                     itemContents = extractedItem.toItemContents()
                 )
-                send(ImportVaultResult.ItemImported(uuid, (index + 1f) / entries.size))
+                send(ImportVaultResult.ItemImported(uuid))
             }
         }
         imports.awaitAll()

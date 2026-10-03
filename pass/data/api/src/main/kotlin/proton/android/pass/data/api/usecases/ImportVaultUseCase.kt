@@ -27,23 +27,19 @@ interface ImportVaultUseCase {
     ): Flow<ImportVaultResult>
 }
 
-sealed class ImportVaultResult(
-    open val progress: Float
-) {
+sealed class ImportVaultResult() {
 
-    data object Started : ImportVaultResult(0.0f)
+    data object Started : ImportVaultResult()
 
     data class Uploading(
-        val uuid: String,
-        override val progress: Float
-    ) : ImportVaultResult(progress = progress)
+        val uuid: String
+    ) : ImportVaultResult()
 
     data class ItemImported(
-        val uuid: String,
-        override val progress: Float
-    ) : ImportVaultResult(progress = progress)
+        val uuid: String
+    ) : ImportVaultResult()
 
-    data object Imported : ImportVaultResult(1.0f)
+    data object Imported : ImportVaultResult()
 
-    data object Failed : ImportVaultResult(1.0f)
+    data object Failed : ImportVaultResult()
 }
