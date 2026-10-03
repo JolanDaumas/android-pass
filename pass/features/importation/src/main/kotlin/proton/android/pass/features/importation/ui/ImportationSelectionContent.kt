@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -40,9 +39,7 @@ import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Bold
 import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
-import proton.android.pass.composecomponents.impl.buttons.LoadingCircleButton
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
-import proton.android.pass.composecomponents.impl.topbar.BackArrowTopAppBar
 import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationUiState
@@ -53,72 +50,44 @@ import proton.android.pass.features.importation.ui.components.SelectableEntryIte
 fun ImportationSelectionContent(
     modifier: Modifier = Modifier,
     state: ImportationUiState,
-    onEvent: (ImportationUiEvent) -> Unit,
-    onBackClick: () -> Unit
+    onEvent: (ImportationUiEvent) -> Unit
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            BackArrowTopAppBar(
-                title = stringResource(R.string.importation_selection_title),
-                actions = {
-                    LoadingCircleButton(
-                        modifier = Modifier.padding(end = Spacing.small),
-                        color = PassTheme.colors.interactionNormMajor2,
-                        isLoading = state.isLoading,
-                        buttonEnabled = state.isSubmitEnabled,
-                        onClick = { onEvent(ImportationUiEvent.OnConfirmSelection) },
-                        text = {
-                            Text(
-                                text = stringResource(R.string.importation_confirm_button),
-                                style = PassTheme.typography.body3Bold(),
-                                color = PassTheme.colors.interactionNormMinor1
-                            )
-                        }
-                    )
-                },
-                onUpClick = onBackClick
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = Spacing.medium)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+    ) {
+        Spacer(modifier = Modifier.height(Spacing.small))
+
+        if (state.selectedFileName != null) {
+            Text(
+                text = state.selectedFileName,
+                style = PassTheme.typography.heroNorm(),
+                color = ProtonTheme.colors.textNorm
+            )
+            Spacer(modifier = Modifier.height(Spacing.extraSmall))
+        }
+
+        state.importError?.let { error ->
+            Text(
+                text = error.asText(),
+                style = PassTheme.typography.body3Norm(),
+                color = ProtonTheme.colors.notificationError
             )
         }
-    ) { paddingValues ->
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = Spacing.medium)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+                .roundedContainerNorm()
+                .fillMaxWidth()
+                .padding(Spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.small)
         ) {
-            Spacer(modifier = Modifier.height(Spacing.small))
-
-            if (state.selectedFileName != null) {
-                Text(
-                    text = state.selectedFileName,
-                    style = PassTheme.typography.heroNorm(),
-                    color = ProtonTheme.colors.textNorm
-                )
-                Spacer(modifier = Modifier.height(Spacing.extraSmall))
-            }
-
-            state.importError?.let { error ->
-                Text(
-                    text = error.asText(),
-                    style = PassTheme.typography.body3Norm(),
-                    color = ProtonTheme.colors.notificationError
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .roundedContainerNorm()
-                    .fillMaxWidth()
-                    .padding(Spacing.medium),
-                verticalArrangement = Arrangement.spacedBy(Spacing.small)
-            ) {
-                state.selectableEntries.forEach { entry ->
-                    key(entry.uuid) {
-                        SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
-                    }
+            state.selectableEntries.forEach { entry ->
+                key(entry.uuid) {
+                    SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
                 }
             }
         }
@@ -137,8 +106,7 @@ private fun ImportationSelectionContentPreview() {
                     SelectableEntryUiModel(uuid = "3", title = "Bank", userName = "client", isSelected = true)
                 )
             ),
-            onEvent = {},
-            onBackClick = {}
+            onEvent = {}
         )
     }
 }

@@ -35,7 +35,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -51,14 +50,11 @@ import me.proton.core.compose.theme.ProtonTheme
 import me.proton.core.compose.theme.defaultNorm
 import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
-import proton.android.pass.commonui.api.body3Bold
 import proton.android.pass.composecomponents.impl.buttons.CircleIconButton
-import proton.android.pass.composecomponents.impl.buttons.LoadingCircleButton
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
 import proton.android.pass.composecomponents.impl.form.ProtonTextField
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldLabel
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldPlaceHolder
-import proton.android.pass.composecomponents.impl.topbar.BackArrowTopAppBar
 import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationUiState
@@ -68,8 +64,7 @@ import me.proton.core.presentation.R as CoreR
 fun ImportationContent(
     modifier: Modifier = Modifier,
     state: ImportationUiState,
-    onEvent: (ImportationUiEvent) -> Unit,
-    onBackClick: () -> Unit
+    onEvent: (ImportationUiEvent) -> Unit
 ) {
     val context = LocalContext.current
     val pickFileLauncher = rememberLauncherForActivityResult(
@@ -81,163 +76,136 @@ fun ImportationContent(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            BackArrowTopAppBar(
-                title = stringResource(R.string.importation_title),
-                actions = {
-                    LoadingCircleButton(
-                        modifier = Modifier.padding(end = Spacing.small),
-                        color = PassTheme.colors.interactionNormMajor2,
-                        isLoading = state.isLoading,
-                        buttonEnabled = state.isSubmitEnabled,
-                        onClick = { onEvent(ImportationUiEvent.OnSubmit) },
-                        text = {
-                            Text(
-                                text = stringResource(R.string.importation_next_button),
-                                style = PassTheme.typography.body3Bold(),
-                                color = PassTheme.colors.interactionNormMinor1
-                            )
-                        }
-                    )
-                },
-                onUpClick = onBackClick
-            )
-        }
-    ) { paddingValues ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = Spacing.medium)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+    ) {
+        Spacer(modifier = Modifier.height(Spacing.small))
+
+        // File selection field
+        ProtonTextField(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = Spacing.medium)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium)
-        ) {
-            Spacer(modifier = Modifier.height(Spacing.small))
-
-            // File selection field
-            ProtonTextField(
-                modifier = Modifier
-                    .roundedContainerNorm()
-                    .fillMaxWidth()
-                    .clickable { pickFileLauncher.launch("*/*") }
-                    .padding(
-                        start = Spacing.none,
-                        top = Spacing.medium,
-                        end = Spacing.extraSmall,
-                        bottom = Spacing.medium
-                    ),
-                value = state.selectedFileName ?: "",
-                editable = false,
-                textStyle = ProtonTheme.typography.defaultNorm,
-                onChange = {},
-                label = {
-                    ProtonTextFieldLabel(
-                        text = stringResource(R.string.importation_file_label),
-                        isError = state.fileError != null
-                    )
-                },
-                placeholder = {
-                    ProtonTextFieldPlaceHolder(text = stringResource(R.string.importation_file_placeholder))
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_proton_file),
-                        contentDescription = null,
-                        tint = ProtonTheme.colors.iconWeak
-                    )
-                },
-                trailingIcon = {
-                    CircleIconButton(
-                        backgroundColor = Color.Unspecified,
-                        onClick = { pickFileLauncher.launch("*/*") }
-                    ) {
-                        Icon(
-                            painter = painterResource(CoreR.drawable.ic_proton_folder),
-                            contentDescription = null,
-                            tint = ProtonTheme.colors.iconNorm
-                        )
-                    }
-                },
-                isError = state.fileError != null,
-                errorMessage = state.fileError?.asText().orEmpty()
-            )
-
-            // Master password input field
-            ProtonTextField(
-                modifier = Modifier
-                    .roundedContainerNorm()
-                    .fillMaxWidth()
-                    .padding(
-                        start = Spacing.none,
-                        top = Spacing.medium,
-                        end = Spacing.extraSmall,
-                        bottom = Spacing.medium
-                    ),
-                value = state.masterPassword,
-                editable = !state.isLoading,
-                textStyle = ProtonTheme.typography.defaultNorm(!state.isLoading),
-                onChange = { onEvent(ImportationUiEvent.OnPasswordChange(it)) },
-                label = {
-                    ProtonTextFieldLabel(
-                        text = stringResource(R.string.importation_master_password_label),
-                        isError = state.passwordError != null
-                    )
-                },
-                placeholder = {
-                    ProtonTextFieldPlaceHolder(text = stringResource(R.string.importation_master_password_placeholder))
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(CoreR.drawable.ic_proton_lock),
-                        contentDescription = null,
-                        tint = ProtonTheme.colors.iconWeak
-                    )
-                },
-                trailingIcon = {
-                    val iconRes = if (state.isPasswordVisible) {
-                        CoreR.drawable.ic_proton_eye
-                    } else {
-                        CoreR.drawable.ic_proton_eye_slash
-                    }
-                    val iconDesc = if (state.isPasswordVisible) {
-                        stringResource(R.string.importation_action_conceal_password)
-                    } else {
-                        stringResource(R.string.importation_action_reveal_password)
-                    }
-                    CircleIconButton(
-                        backgroundColor = Color.Unspecified,
-                        onClick = {
-                            onEvent(ImportationUiEvent.OnTogglePasswordVisibility(!state.isPasswordVisible))
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(iconRes),
-                            contentDescription = iconDesc,
-                            tint = ProtonTheme.colors.iconNorm
-                        )
-                    }
-                },
-                visualTransformation = if (state.isPasswordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                keyboardOptions = KeyboardOptions(
-                    autoCorrectEnabled = false,
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                .roundedContainerNorm()
+                .fillMaxWidth()
+                .clickable { pickFileLauncher.launch("*/*") }
+                .padding(
+                    start = Spacing.none,
+                    top = Spacing.medium,
+                    end = Spacing.extraSmall,
+                    bottom = Spacing.medium
                 ),
-                onDoneClick = {
-                    if (state.isSubmitEnabled) {
-                        onEvent(ImportationUiEvent.OnSubmit)
+            value = state.selectedFileName ?: "",
+            editable = false,
+            textStyle = ProtonTheme.typography.defaultNorm,
+            onChange = {},
+            label = {
+                ProtonTextFieldLabel(
+                    text = stringResource(R.string.importation_file_label),
+                    isError = state.fileError != null
+                )
+            },
+            placeholder = {
+                ProtonTextFieldPlaceHolder(text = stringResource(R.string.importation_file_placeholder))
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_proton_file),
+                    contentDescription = null,
+                    tint = ProtonTheme.colors.iconWeak
+                )
+            },
+            trailingIcon = {
+                CircleIconButton(
+                    backgroundColor = Color.Unspecified,
+                    onClick = { pickFileLauncher.launch("*/*") }
+                ) {
+                    Icon(
+                        painter = painterResource(CoreR.drawable.ic_proton_folder),
+                        contentDescription = null,
+                        tint = ProtonTheme.colors.iconNorm
+                    )
+                }
+            },
+            isError = state.fileError != null,
+            errorMessage = state.fileError?.asText().orEmpty()
+        )
+
+        // Master password input field
+        ProtonTextField(
+            modifier = Modifier
+                .roundedContainerNorm()
+                .fillMaxWidth()
+                .padding(
+                    start = Spacing.none,
+                    top = Spacing.medium,
+                    end = Spacing.extraSmall,
+                    bottom = Spacing.medium
+                ),
+            value = state.masterPassword,
+            editable = !state.isLoading,
+            textStyle = ProtonTheme.typography.defaultNorm(!state.isLoading),
+            onChange = { onEvent(ImportationUiEvent.OnPasswordChange(it)) },
+            label = {
+                ProtonTextFieldLabel(
+                    text = stringResource(R.string.importation_master_password_label),
+                    isError = state.passwordError != null
+                )
+            },
+            placeholder = {
+                ProtonTextFieldPlaceHolder(text = stringResource(R.string.importation_master_password_placeholder))
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(CoreR.drawable.ic_proton_lock),
+                    contentDescription = null,
+                    tint = ProtonTheme.colors.iconWeak
+                )
+            },
+            trailingIcon = {
+                val iconRes = if (state.isPasswordVisible) {
+                    CoreR.drawable.ic_proton_eye
+                } else {
+                    CoreR.drawable.ic_proton_eye_slash
+                }
+                val iconDesc = if (state.isPasswordVisible) {
+                    stringResource(R.string.importation_action_conceal_password)
+                } else {
+                    stringResource(R.string.importation_action_reveal_password)
+                }
+                CircleIconButton(
+                    backgroundColor = Color.Unspecified,
+                    onClick = {
+                        onEvent(ImportationUiEvent.OnTogglePasswordVisibility(!state.isPasswordVisible))
                     }
-                },
-                isError = state.passwordError != null,
-                errorMessage = state.passwordError?.asText().orEmpty()
-            )
-        }
+                ) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = iconDesc,
+                        tint = ProtonTheme.colors.iconNorm
+                    )
+                }
+            },
+            visualTransformation = if (state.isPasswordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            keyboardOptions = KeyboardOptions(
+                autoCorrectEnabled = false,
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            onDoneClick = {
+                if (state.isSubmitEnabled) {
+                    onEvent(ImportationUiEvent.OnSubmit)
+                }
+            },
+            isError = state.passwordError != null,
+            errorMessage = state.passwordError?.asText().orEmpty()
+        )
     }
 }
 
@@ -262,8 +230,7 @@ private fun ImportationContentPreview() {
                 selectedFileName = "passwords_export.csv",
                 masterPassword = "secret_password"
             ),
-            onEvent = {},
-            onBackClick = {}
+            onEvent = {}
         )
     }
 }
