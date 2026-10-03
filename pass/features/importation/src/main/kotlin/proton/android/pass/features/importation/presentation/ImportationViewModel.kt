@@ -43,26 +43,24 @@ class ImportationViewModel @Inject constructor(
     private val encryptionContextProvider: EncryptionContextProvider
 ) : ViewModel() {
 
-    private val fileState = MutableStateFlow(FileState())
-    private val credentialsState = MutableStateFlow(CredentialsState())
+    private val formState = MutableStateFlow(FormState())
     private val importState = MutableStateFlow(ImportState())
     private val entriesState = MutableStateFlow(EntriesState())
 
     val state: StateFlow<ImportationUiState> = combine(
-        fileState,
-        credentialsState,
+        formState,
         importState,
         entriesState
-    ) { file, credentials, workflow, entries ->
+    ) { form, workflow, entries ->
         ImportationUiState(
             step = workflow.step,
-            selectedFileUri = file.uri,
-            selectedFileName = file.name,
-            masterPassword = credentials.password,
-            isPasswordVisible = credentials.isPasswordVisible,
+            selectedFileUri = form.uri,
+            selectedFileName = form.name,
+            masterPassword = form.password,
+            isPasswordVisible = form.isPasswordVisible,
             isLoading = workflow.isLoading,
-            fileError = file.error,
-            passwordError = credentials.error,
+            fileError = form.fileError,
+            passwordError = form.passwordError,
             importError = workflow.error,
             isImportComplete = workflow.isComplete,
             selectableEntries = entries.selectable,
@@ -75,11 +73,11 @@ class ImportationViewModel @Inject constructor(
     )
 
     fun onFileSelected(uri: Uri, fileName: String?) {
-        fileState.update {
+        formState.update {
             it.copy(
                 uri = uri,
                 name = fileName,
-                error = null
+                fileError = null
             )
         }
         entriesState.update {
@@ -88,16 +86,16 @@ class ImportationViewModel @Inject constructor(
     }
 
     fun onPasswordChange(password: String) {
-        credentialsState.update {
+        formState.update {
             it.copy(
                 password = password,
-                error = null
+                passwordError = null
             )
         }
     }
 
     fun onTogglePasswordVisibility(isVisible: Boolean) {
-        credentialsState.update {
+        formState.update {
             it.copy(isPasswordVisible = isVisible)
         }
     }
@@ -114,14 +112,15 @@ class ImportationViewModel @Inject constructor(
 
     fun onSubmit() {
         if (importState.value.isLoading) return
-        val uri = fileState.value.uri ?: return
-        val password = credentialsState.value.password
+        val uri = formState.value.uri ?: return
+        val password = formState.value.password
         viewModelScope.launch {
             importState.update {
                 it.copy(isLoading = true, error = null)
             }
-            fileState.update { it.copy(error = null) }
-            credentialsState.update { it.copy(error = null) }
+            formState.update {
+                it.copy(fileError = null, passwordError = null)
+            }
             extractVaultUseCase(URI(uri.toString()), password)
                 .fold(
                     onSuccess = { entries ->
@@ -139,9 +138,9 @@ class ImportationViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         importState.update { it.copy(isLoading = false) }
-                        credentialsState.update {
+                        formState.update {
                             it.copy(
-                                error = error.localizedMessage
+                                passwordError = error.localizedMessage
                                     ?.let(ImportationUiError::Message)
                                     ?: ImportationUiError.Generic
                             )
@@ -249,16 +248,13 @@ class ImportationViewModel @Inject constructor(
         }
     }
 
-    private data class FileState(
+    private data class FormState(
         val uri: Uri? = null,
         val name: String? = null,
-        val error: ImportationUiError? = null
-    )
-
-    private data class CredentialsState(
         val password: String = "",
         val isPasswordVisible: Boolean = false,
-        val error: ImportationUiError? = null
+        val fileError: ImportationUiError? = null,
+        val passwordError: ImportationUiError? = null
     )
 
     private data class ImportState(
