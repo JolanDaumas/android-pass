@@ -20,7 +20,6 @@ package proton.android.pass.features.importation.presentation
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
-import proton.android.pass.domain.ItemContents
 
 @Immutable
 data class ImportationUiState(
@@ -34,7 +33,6 @@ data class ImportationUiState(
     val passwordError: String? = null,
     val importError: String? = null,
     val isImportComplete: Boolean = false,
-    val importedEntries: List<ItemContents.Login> = emptyList(),
     val selectableEntries: List<SelectableEntryUiModel> = emptyList(),
     val importProgressEntries: List<ImportProgressEntry> = emptyList()
 ) {

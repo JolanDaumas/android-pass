@@ -16,17 +16,13 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.presentation
+package proton.android.pass.domain
 
-import androidx.compose.runtime.Immutable
-
-@Immutable
-data class SelectableEntryUiModel(
+data class ExtractedItem(
     val uuid: String,
     val title: String,
-    val userName: String,
-    val note: String = "",
-    val encryptedPassword: String = "",
-    val urls: List<String> = emptyList(),
-    val isSelected: Boolean = true
+    val note: String,
+    val username: String,
+    val encryptedPassword: HiddenState,
+    val urls: List<String>
 )

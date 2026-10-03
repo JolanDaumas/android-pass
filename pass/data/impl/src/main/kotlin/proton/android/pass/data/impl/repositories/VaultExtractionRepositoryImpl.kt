@@ -32,11 +32,9 @@ import kotlinx.coroutines.withContext
 import me.proton.core.crypto.common.keystore.EncryptedString
 import proton.android.pass.crypto.api.context.EncryptionContextProvider
 import proton.android.pass.data.api.repositories.VaultExtractionRepository
-import proton.android.pass.domain.AutofillUrl
-import proton.android.pass.domain.AutofillUrlMode
+import proton.android.pass.domain.ExtractedItem
 import proton.android.pass.domain.ExtractedVault
 import proton.android.pass.domain.HiddenState
-import proton.android.pass.domain.ItemContents
 import java.net.URI
 import javax.inject.Inject
 
@@ -51,45 +49,36 @@ class VaultExtractionRepositoryImpl @Inject constructor(
                 val credentials = Credentials.from(EncryptedValue.fromString(masterPassword))
                 val keePassDatabase = KeePassDatabase.decode(inputStream, credentials)
                 encryptionContextProvider.withEncryptionContextSuspendable {
-                    ExtractedVault(keePassDatabase.toLoginItems(::encrypt))
+                    ExtractedVault(keePassDatabase.toExtractedItems(::encrypt))
                 }
             } ?: throw IllegalStateException("Cannot open input stream for uri: $uri")
         }
     }
 }
 
-private fun KeePassDatabase.toLoginItems(
+private fun KeePassDatabase.toExtractedItems(
     encrypt: (String) -> EncryptedString
-): List<ItemContents.Login> =
-    content.group.toLoginItems(encrypt)
+): List<ExtractedItem> =
+    content.group.toExtractedItems(encrypt)
 
-private fun Group.toLoginItems(
+private fun Group.toExtractedItems(
     encrypt: (String) -> EncryptedString
-): List<ItemContents.Login> =
-    entries.map { it.toLoginItem(encrypt) } + groups.flatMap { it.toLoginItems(encrypt) }
+): List<ExtractedItem> =
+    entries.map { it.toExtractedItem(encrypt) } + groups.flatMap { it.toExtractedItems(encrypt) }
 
-private fun Entry.toLoginItem(
-    encrypt: (String) -> EncryptedString
-): ItemContents.Login {
+private fun Entry.toExtractedItem(encrypt: (String) -> EncryptedString): ExtractedItem {
     val password = fields.password?.content.orEmpty()
     val urls = fields.url?.content?.takeIf(String::isNotBlank)?.let(::listOf).orEmpty()
-    return ItemContents.Login(
+    return ExtractedItem(
+        uuid = uuid.toString(),
         title = fields.title?.content.orEmpty(),
         note = fields.notes?.content.orEmpty(),
-        customFields = emptyList(),
-        itemEmail = "",
-        itemUsername = fields.userName?.content.orEmpty(),
-        password = if (password.isEmpty()) {
+        username = fields.userName?.content.orEmpty(),
+        encryptedPassword = if (password.isEmpty()) {
             HiddenState.Empty(encrypt(password))
         } else {
             HiddenState.Revealed(encrypt(password), password)
         },
-        urls = urls,
-        packageInfoSet = emptySet(),
-        primaryTotp = HiddenState.Empty(encrypt("")),
-        passkeys = emptyList(),
-        autofillUrls = urls.map { url ->
-            AutofillUrl(url = url, mode = AutofillUrlMode.Default)
-        }
+        urls = urls
     )
 }

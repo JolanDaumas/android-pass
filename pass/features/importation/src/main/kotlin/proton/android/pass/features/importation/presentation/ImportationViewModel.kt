@@ -23,12 +23,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import proton.android.pass.crypto.api.context.EncryptionContextProvider
 import proton.android.pass.data.api.usecases.ExtractVaultUseCase
 import proton.android.pass.data.api.usecases.ImportVaultResult
 import proton.android.pass.data.api.usecases.ImportVaultUseCase
@@ -40,7 +40,8 @@ import javax.inject.Inject
 class ImportationViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val extractVaultUseCase: ExtractVaultUseCase,
-    private val importVaultUseCase: ImportVaultUseCase
+    private val importVaultUseCase: ImportVaultUseCase,
+    private val encryptionContextProvider: EncryptionContextProvider
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ImportationUiState())
@@ -54,7 +55,6 @@ class ImportationViewModel @Inject constructor(
                         selectedFileUri = event.uri,
                         selectedFileName = event.fileName,
                         fileError = null,
-                        importedEntries = emptyList(),
                         selectableEntries = emptyList(),
                         importProgressEntries = emptyList()
                     )
@@ -102,13 +102,16 @@ class ImportationViewModel @Inject constructor(
                     val result = extractVaultUseCase(URI(uri.toString()), password)
                     result.fold(
                         onSuccess = { entries ->
-                            val extractedItems = entries.extractedItems
+                            val selectableEntries =
+                                encryptionContextProvider.withEncryptionContext {
+                                    entries.extractedItems.toUiModel(::decrypt)
+                                }
+
                             _state.update {
                                 it.copy(
                                     isLoading = false,
                                     step = ImportationStep.SelectItems,
-                                    importedEntries = extractedItems,
-                                    selectableEntries = extractedItems.toSelectableEntryUiModels()
+                                    selectableEntries = selectableEntries
                                 )
                             }
                         },
@@ -125,41 +128,40 @@ class ImportationViewModel @Inject constructor(
                 }
             }
 
-            ImportationUiEvent.OnConfirmSelection -> {
-                val currentState = _state.value
-                if (currentState.isLoading || !currentState.isSubmitEnabled) return
-                val selectedEntryUuids = currentState.selectableEntries
-                    .filter(SelectableEntryUiModel::isSelected)
-                    .map(SelectableEntryUiModel::uuid)
-                    .toSet()
-                val entries = currentState.importedEntries.selectEntries(selectedEntryUuids)
-                if (entries.isEmpty()) return
+            ImportationUiEvent.OnConfirmSelection ->
                 viewModelScope.launch {
-                    _state.update {
-                        it.copy(
-                            step = ImportationStep.UploadEntries,
-                            isLoading = true,
-                            importError = null,
-                            importProgressEntries = entries.indices.map { index ->
-                                val uuid = index.toString()
-                                ImportProgressEntry(
-                                    uuid = uuid
-                                )
-                            }
-                        )
+                    val entries = encryptionContextProvider.withEncryptionContext {
+                        _state.value.selectableEntries
+                            .filter(SelectableEntryUiModel::isSelected)
+                            .toDomain(::encrypt)
                     }
 
-                    try {
-                        var isImportComplete = false
-                        importVaultUseCase(entries).collect { result ->
+                    importVaultUseCase(entries)
+                        .collect { result ->
                             when (result) {
-                                ImportVaultResult.Started -> Unit
+                                ImportVaultResult.Started -> _state.update {
+                                    it.copy(
+                                        step = ImportationStep.UploadEntries,
+                                        isLoading = true,
+                                        importError = null,
+                                        importProgressEntries = entries.map { entry ->
+                                            ImportProgressEntry(
+                                                uuid = entry.uuid
+                                            )
+                                        }
+                                    )
+                                }
+
                                 is ImportVaultResult.Uploading ->
-                                    updateImportProgress(result.uuid, ImportProgressStatus.Uploading)
+                                    updateImportProgress(
+                                        result.uuid,
+                                        ImportProgressStatus.Uploading
+                                    )
+
                                 is ImportVaultResult.ItemImported ->
                                     updateImportProgress(result.uuid, ImportProgressStatus.Imported)
+
                                 ImportVaultResult.Imported -> {
-                                    isImportComplete = true
                                     _state.update { state ->
                                         state.copy(
                                             isLoading = false,
@@ -170,45 +172,24 @@ class ImportationViewModel @Inject constructor(
                                         )
                                     }
                                 }
-                                ImportVaultResult.Failed -> Unit
-                            }
-                        }
-                        if (!isImportComplete) {
-                            _state.update {
-                                it.copy(
-                                    step = ImportationStep.SelectItems,
-                                    isLoading = false,
-                                    importError = context.getString(R.string.importation_error_import),
-                                    importProgressEntries = it.importProgressEntries.map { progressEntry ->
-                                        if (progressEntry.status == ImportProgressStatus.Imported) {
-                                            progressEntry
-                                        } else {
-                                            progressEntry.copy(status = ImportProgressStatus.Failed)
+
+                                ImportVaultResult.Failed -> _state.update {
+                                    it.copy(
+                                        step = ImportationStep.SelectItems,
+                                        isLoading = false,
+                                        importError = context.getString(R.string.importation_error_import),
+                                        importProgressEntries = it.importProgressEntries.map { progressEntry ->
+                                            if (progressEntry.status == ImportProgressStatus.Imported) {
+                                                progressEntry
+                                            } else {
+                                                progressEntry.copy(status = ImportProgressStatus.Failed)
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
-                    } catch (exception: CancellationException) {
-                        throw exception
-                    } catch (exception: Exception) {
-                        _state.update {
-                            it.copy(
-                                step = ImportationStep.SelectItems,
-                                isLoading = false,
-                                importError = context.getString(R.string.importation_error_import),
-                                importProgressEntries = it.importProgressEntries.map { progressEntry ->
-                                    if (progressEntry.status == ImportProgressStatus.Imported) {
-                                        progressEntry
-                                    } else {
-                                        progressEntry.copy(status = ImportProgressStatus.Failed)
-                                    }
-                                }
-                            )
-                        }
-                    }
                 }
-            }
 
             ImportationUiEvent.OnBackStep -> {
                 if (_state.value.isLoading) return

@@ -19,11 +19,11 @@
 package proton.android.pass.data.api.usecases
 
 import kotlinx.coroutines.flow.Flow
-import proton.android.pass.domain.ItemContents
+import proton.android.pass.domain.ExtractedItem
 
 interface ImportVaultUseCase {
     operator fun invoke(
-        entries: List<ItemContents.Login>
+        entries: List<ExtractedItem>
     ): Flow<ImportVaultResult>
 }
 

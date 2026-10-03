@@ -18,16 +18,48 @@
 
 package proton.android.pass.features.importation.presentation
 
-import proton.android.pass.domain.ItemContents
+import me.proton.core.crypto.common.keystore.EncryptedString
+import proton.android.pass.domain.ExtractedItem
+import proton.android.pass.domain.HiddenState
 
-fun List<ItemContents.Login>.toSelectableEntryUiModels(): List<SelectableEntryUiModel> =
-    mapIndexed { index, itemContents ->
+fun List<ExtractedItem>.toUiModel(
+    decrypt: (EncryptedString) -> String
+): List<SelectableEntryUiModel> =
+    map { extractedItem ->
         SelectableEntryUiModel(
-            uuid = index.toString(),
-            title = itemContents.title,
-            userName = itemContents.itemUsername
+            uuid = extractedItem.uuid,
+            title = extractedItem.title,
+            userName = extractedItem.username,
+            note = extractedItem.note,
+            encryptedPassword = extractedItem.encryptedPassword.toUiModel(decrypt),
+            urls = extractedItem.urls
         )
     }
 
-fun List<ItemContents.Login>.selectEntries(selectedEntryUuids: Set<String>): List<ItemContents.Login> =
-    filterIndexed { index, _ -> index.toString() in selectedEntryUuids }
+fun List<SelectableEntryUiModel>.toDomain(
+    encrypt: (String) -> EncryptedString
+): List<ExtractedItem> =
+    map { entry ->
+        ExtractedItem(
+            uuid = entry.uuid,
+            title = entry.title,
+            note = entry.note,
+            username = entry.userName,
+            encryptedPassword = entry.encryptedPassword.toDomain(encrypt),
+            urls = entry.urls
+        )
+    }
+
+private fun HiddenState.toUiModel(decrypt: (EncryptedString) -> String): String =
+    when (this) {
+        is HiddenState.Empty -> ""
+        is HiddenState.Concealed -> decrypt(encrypted)
+        is HiddenState.Revealed -> clearText
+    }
+
+private fun String.toDomain(encrypt: (String) -> EncryptedString): HiddenState =
+    if (isEmpty()) {
+        HiddenState.Empty(encrypt(this))
+    } else {
+        HiddenState.Revealed(encrypt(this), this)
+    }

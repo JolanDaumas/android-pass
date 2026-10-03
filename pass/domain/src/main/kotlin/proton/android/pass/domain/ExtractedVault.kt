@@ -19,5 +19,5 @@
 package proton.android.pass.domain
 
 data class ExtractedVault(
-    val extractedItems: List<ItemContents.Login>
+    val extractedItems: List<ExtractedItem>
 )
