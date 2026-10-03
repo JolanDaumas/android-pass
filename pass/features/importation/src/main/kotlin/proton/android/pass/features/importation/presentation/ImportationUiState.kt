@@ -67,7 +67,6 @@ data class ImportationUiState(
 sealed interface ImportationUiError {
     data object Generic : ImportationUiError
     data object ImportFailed : ImportationUiError
-    data class Message(val value: String) : ImportationUiError
 }
 
 @Immutable

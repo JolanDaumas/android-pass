@@ -27,5 +27,4 @@ import proton.android.pass.features.importation.presentation.ImportationUiError
 internal fun ImportationUiError.asText(): String = when (this) {
     ImportationUiError.Generic -> stringResource(R.string.importation_error_generic)
     ImportationUiError.ImportFailed -> stringResource(R.string.importation_error_import)
-    is ImportationUiError.Message -> value
 }

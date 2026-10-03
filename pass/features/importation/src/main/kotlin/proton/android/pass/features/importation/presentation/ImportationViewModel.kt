@@ -140,9 +140,7 @@ class ImportationViewModel @Inject constructor(
                         importState.update { it.copy(isLoading = false) }
                         formState.update {
                             it.copy(
-                                passwordError = error.localizedMessage
-                                    ?.let(ImportationUiError::Message)
-                                    ?: ImportationUiError.Generic
+                                passwordError = ImportationUiError.Generic
                             )
                         }
                     }
