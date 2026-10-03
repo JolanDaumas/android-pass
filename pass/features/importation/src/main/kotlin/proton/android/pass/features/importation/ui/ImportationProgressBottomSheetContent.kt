@@ -34,13 +34,13 @@ import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Bold
 import proton.android.pass.commonui.api.bottomSheet
 import proton.android.pass.features.importation.R
-import proton.android.pass.features.importation.presentation.ImportationUiState
+import proton.android.pass.features.importation.presentation.ImportProgressEntry
 import proton.android.pass.features.importation.presentation.ImportProgressStatus
 
 @Composable
-fun ImportationProgressBottomSheetContent(state: ImportationUiState) {
-    val completedCount = state.importProgressEntries.count { it.status == ImportProgressStatus.Imported }
-    val totalCount = state.importProgressEntries.size
+fun ImportationProgressBottomSheetContent(importProgressEntries: List<ImportProgressEntry>) {
+    val completedCount = importProgressEntries.count { it.status == ImportProgressStatus.Imported }
+    val totalCount = importProgressEntries.size
 
     Column(
         modifier = Modifier

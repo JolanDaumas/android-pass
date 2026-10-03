@@ -16,7 +16,7 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.ui
+package proton.android.pass.features.importation.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,13 +40,18 @@ import proton.android.pass.composecomponents.impl.form.ProtonTextField
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldLabel
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldPlaceHolder
 import proton.android.pass.features.importation.R
+import proton.android.pass.features.importation.presentation.ImportationUiError
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
-import proton.android.pass.features.importation.presentation.ImportationUiState
+import proton.android.pass.features.importation.ui.asText
 import me.proton.core.presentation.R as CoreR
 
 @Composable
 internal fun ImportationMasterPasswordField(
-    state: ImportationUiState,
+    masterPassword: String,
+    isPasswordVisible: Boolean,
+    isLoading: Boolean,
+    passwordError: ImportationUiError?,
+    isSubmitEnabled: Boolean,
     onEvent: (ImportationUiEvent) -> Unit
 ) {
     ProtonTextField(
@@ -59,14 +64,14 @@ internal fun ImportationMasterPasswordField(
                 end = Spacing.extraSmall,
                 bottom = Spacing.medium
             ),
-        value = state.masterPassword,
-        editable = !state.isLoading,
-        textStyle = ProtonTheme.typography.defaultNorm(!state.isLoading),
+        value = masterPassword,
+        editable = !isLoading,
+        textStyle = ProtonTheme.typography.defaultNorm(!isLoading),
         onChange = { onEvent(ImportationUiEvent.OnPasswordChange(it)) },
         label = {
             ProtonTextFieldLabel(
                 text = stringResource(R.string.importation_master_password_label),
-                isError = state.passwordError != null
+                isError = passwordError != null
             )
         },
         placeholder = {
@@ -81,13 +86,13 @@ internal fun ImportationMasterPasswordField(
         },
         trailingIcon = {
             PasswordVisibilityButton(
-                isVisible = state.isPasswordVisible,
+                isVisible = isPasswordVisible,
                 onClick = {
-                    onEvent(ImportationUiEvent.OnTogglePasswordVisibility(!state.isPasswordVisible))
+                    onEvent(ImportationUiEvent.OnTogglePasswordVisibility(!isPasswordVisible))
                 }
             )
         },
-        visualTransformation = if (state.isPasswordVisible) {
+        visualTransformation = if (isPasswordVisible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
@@ -98,12 +103,12 @@ internal fun ImportationMasterPasswordField(
             imeAction = ImeAction.Done
         ),
         onDoneClick = {
-            if (state.isSubmitEnabled) {
+            if (isSubmitEnabled) {
                 onEvent(ImportationUiEvent.OnSubmit)
             }
         },
-        isError = state.passwordError != null,
-        errorMessage = state.passwordError?.asText().orEmpty()
+        isError = passwordError != null,
+        errorMessage = passwordError?.asText().orEmpty()
     )
 }
 
@@ -112,7 +117,11 @@ internal fun ImportationMasterPasswordField(
 private fun ImportationMasterPasswordFieldPreview() {
     PassTheme {
         ImportationMasterPasswordField(
-            state = ImportationUiState.initial().copy(masterPassword = "secret_password"),
+            masterPassword = "secret_password",
+            isPasswordVisible = false,
+            isLoading = false,
+            passwordError = null,
+            isSubmitEnabled = true,
             onEvent = {}
         )
     }

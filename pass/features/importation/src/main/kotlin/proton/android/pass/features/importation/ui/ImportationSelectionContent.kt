@@ -41,15 +41,17 @@ import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
 import proton.android.pass.features.importation.R
+import proton.android.pass.features.importation.presentation.ImportationUiError
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
-import proton.android.pass.features.importation.presentation.ImportationUiState
 import proton.android.pass.features.importation.presentation.SelectableEntryUiModel
 import proton.android.pass.features.importation.ui.components.SelectableEntryItem
 
 @Composable
 fun ImportationSelectionContent(
     modifier: Modifier = Modifier,
-    state: ImportationUiState,
+    selectedFileName: String?,
+    importError: ImportationUiError?,
+    selectableEntries: List<SelectableEntryUiModel>,
     onEvent: (ImportationUiEvent) -> Unit
 ) {
     Column(
@@ -61,16 +63,16 @@ fun ImportationSelectionContent(
     ) {
         Spacer(modifier = Modifier.height(Spacing.small))
 
-        if (state.selectedFileName != null) {
+        if (selectedFileName != null) {
             Text(
-                text = state.selectedFileName,
+                text = selectedFileName,
                 style = PassTheme.typography.heroNorm(),
                 color = ProtonTheme.colors.textNorm
             )
             Spacer(modifier = Modifier.height(Spacing.extraSmall))
         }
 
-        state.importError?.let { error ->
+        importError?.let { error ->
             Text(
                 text = error.asText(),
                 style = PassTheme.typography.body3Norm(),
@@ -85,7 +87,7 @@ fun ImportationSelectionContent(
                 .padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small)
         ) {
-            state.selectableEntries.forEach { entry ->
+            selectableEntries.forEach { entry ->
                 key(entry.uuid) {
                     SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
                 }
@@ -99,12 +101,11 @@ fun ImportationSelectionContent(
 private fun ImportationSelectionContentPreview() {
     PassTheme {
         ImportationSelectionContent(
-            state = ImportationUiState.initial().copy(
-                selectedFileName = "My KeePass Database",
-                selectableEntries = listOf(
-                    SelectableEntryUiModel(uuid = "2", title = "Twitter", userName = "user", isSelected = true),
-                    SelectableEntryUiModel(uuid = "3", title = "Bank", userName = "client", isSelected = true)
-                )
+            selectedFileName = "My KeePass Database",
+            importError = null,
+            selectableEntries = listOf(
+                SelectableEntryUiModel(uuid = "2", title = "Twitter", userName = "user", isSelected = true),
+                SelectableEntryUiModel(uuid = "3", title = "Bank", userName = "client", isSelected = true)
             ),
             onEvent = {}
         )

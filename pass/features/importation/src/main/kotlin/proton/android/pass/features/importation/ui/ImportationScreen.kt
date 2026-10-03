@@ -82,7 +82,7 @@ fun ImportationScreen(
         sheetState = sheetState,
         sheetContent = {
             if (state.step == ImportationStep.UploadEntries) {
-                ImportationProgressBottomSheetContent(state = state)
+                ImportationProgressBottomSheetContent(importProgressEntries = state.importProgressEntries)
             }
         },
         content = {

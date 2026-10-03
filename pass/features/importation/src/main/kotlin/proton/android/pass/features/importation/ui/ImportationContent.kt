@@ -35,13 +35,21 @@ import androidx.compose.ui.platform.LocalContext
 import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.features.importation.extensions.getFileName
+import proton.android.pass.features.importation.presentation.ImportationUiError
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
-import proton.android.pass.features.importation.presentation.ImportationUiState
+import proton.android.pass.features.importation.ui.components.ImportationFileField
+import proton.android.pass.features.importation.ui.components.ImportationMasterPasswordField
 
 @Composable
 fun ImportationContent(
     modifier: Modifier = Modifier,
-    state: ImportationUiState,
+    selectedFileName: String?,
+    fileError: ImportationUiError?,
+    masterPassword: String,
+    isPasswordVisible: Boolean,
+    isLoading: Boolean,
+    passwordError: ImportationUiError?,
+    isSubmitEnabled: Boolean,
     onEvent: (ImportationUiEvent) -> Unit
 ) {
     val context = LocalContext.current
@@ -64,12 +72,17 @@ fun ImportationContent(
         Spacer(modifier = Modifier.height(Spacing.small))
 
         ImportationFileField(
-            state = state,
+            selectedFileName = selectedFileName,
+            fileError = fileError,
             onPickFile = { pickFileLauncher.launch("*/*") }
         )
 
         ImportationMasterPasswordField(
-            state = state,
+            masterPassword = masterPassword,
+            isPasswordVisible = isPasswordVisible,
+            isLoading = isLoading,
+            passwordError = passwordError,
+            isSubmitEnabled = isSubmitEnabled,
             onEvent = onEvent
         )
     }
@@ -80,10 +93,13 @@ fun ImportationContent(
 private fun ImportationContentPreview() {
     PassTheme {
         ImportationContent(
-            state = ImportationUiState.initial().copy(
-                selectedFileName = "passwords_export.csv",
-                masterPassword = "secret_password"
-            ),
+            selectedFileName = "passwords_export.csv",
+            fileError = null,
+            masterPassword = "secret_password",
+            isPasswordVisible = false,
+            isLoading = false,
+            passwordError = null,
+            isSubmitEnabled = true,
             onEvent = {}
         )
     }

@@ -105,12 +105,20 @@ fun ImportationScreenContent(
         ) {
             when (state.step) {
                 ImportationStep.InputCredentials -> ImportationContent(
-                    state = state,
+                    selectedFileName = state.selectedFileName,
+                    fileError = state.fileError,
+                    masterPassword = state.masterPassword,
+                    isPasswordVisible = state.isPasswordVisible,
+                    isLoading = state.isLoading,
+                    passwordError = state.passwordError,
+                    isSubmitEnabled = state.isSubmitEnabled,
                     onEvent = onEvent
                 )
                 ImportationStep.SelectItems,
                 ImportationStep.UploadEntries -> ImportationSelectionContent(
-                    state = state,
+                    selectedFileName = state.selectedFileName,
+                    importError = state.importError,
+                    selectableEntries = state.selectableEntries,
                     onEvent = onEvent
                 )
             }

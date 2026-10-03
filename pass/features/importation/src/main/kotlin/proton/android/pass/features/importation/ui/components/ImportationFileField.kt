@@ -16,7 +16,7 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.ui
+package proton.android.pass.features.importation.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,12 +38,14 @@ import proton.android.pass.composecomponents.impl.form.ProtonTextField
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldLabel
 import proton.android.pass.composecomponents.impl.form.ProtonTextFieldPlaceHolder
 import proton.android.pass.features.importation.R
-import proton.android.pass.features.importation.presentation.ImportationUiState
+import proton.android.pass.features.importation.presentation.ImportationUiError
+import proton.android.pass.features.importation.ui.asText
 import me.proton.core.presentation.R as CoreR
 
 @Composable
 internal fun ImportationFileField(
-    state: ImportationUiState,
+    selectedFileName: String?,
+    fileError: ImportationUiError?,
     onPickFile: () -> Unit
 ) {
     ProtonTextField(
@@ -57,14 +59,14 @@ internal fun ImportationFileField(
                 end = Spacing.extraSmall,
                 bottom = Spacing.medium
             ),
-        value = state.selectedFileName ?: "",
+        value = selectedFileName.orEmpty(),
         editable = false,
         textStyle = ProtonTheme.typography.defaultNorm,
         onChange = {},
         label = {
             ProtonTextFieldLabel(
                 text = stringResource(R.string.importation_file_label),
-                isError = state.fileError != null
+                isError = fileError != null
             )
         },
         placeholder = {
@@ -89,8 +91,8 @@ internal fun ImportationFileField(
                 )
             }
         },
-        isError = state.fileError != null,
-        errorMessage = state.fileError?.asText().orEmpty()
+        isError = fileError != null,
+        errorMessage = fileError?.asText().orEmpty()
     )
 }
 
@@ -99,7 +101,8 @@ internal fun ImportationFileField(
 private fun ImportationFileFieldPreview() {
     PassTheme {
         ImportationFileField(
-            state = ImportationUiState.initial().copy(selectedFileName = "passwords_export.csv"),
+            selectedFileName = "passwords_export.csv",
+            fileError = null,
             onPickFile = {}
         )
     }

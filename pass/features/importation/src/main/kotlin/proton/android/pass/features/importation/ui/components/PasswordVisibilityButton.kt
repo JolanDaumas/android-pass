@@ -16,7 +16,7 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.features.importation.ui
+package proton.android.pass.features.importation.ui.components
 
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
