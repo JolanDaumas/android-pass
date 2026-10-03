@@ -29,9 +29,9 @@ data class ImportationUiState(
     val masterPassword: String = "",
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
-    val fileError: String? = null,
-    val passwordError: String? = null,
-    val importError: String? = null,
+    val fileError: ImportationUiError? = null,
+    val passwordError: ImportationUiError? = null,
+    val importError: ImportationUiError? = null,
     val isImportComplete: Boolean = false,
     val selectableEntries: List<SelectableEntryUiModel> = emptyList(),
     val importProgressEntries: List<ImportProgressEntry> = emptyList()
@@ -45,6 +45,12 @@ data class ImportationUiState(
             ImportationStep.SelectItems -> selectedEntryCount > 0 && !isLoading
             ImportationStep.UploadEntries -> false
         }
+}
+
+sealed interface ImportationUiError {
+    data object Generic : ImportationUiError
+    data object ImportFailed : ImportationUiError
+    data class Message(val value: String) : ImportationUiError
 }
 
 @Immutable

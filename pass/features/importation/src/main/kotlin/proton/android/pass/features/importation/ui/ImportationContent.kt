@@ -161,7 +161,7 @@ fun ImportationContent(
                     }
                 },
                 isError = state.fileError != null,
-                errorMessage = state.fileError.orEmpty()
+                errorMessage = state.fileError?.asText().orEmpty()
             )
 
             // Master password input field
@@ -235,7 +235,7 @@ fun ImportationContent(
                     }
                 },
                 isError = state.passwordError != null,
-                errorMessage = state.passwordError.orEmpty()
+                errorMessage = state.passwordError?.asText().orEmpty()
             )
         }
     }

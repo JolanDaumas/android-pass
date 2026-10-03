@@ -102,7 +102,7 @@ fun ImportationSelectionContent(
 
             state.importError?.let { error ->
                 Text(
-                    text = error,
+                    text = error.asText(),
                     style = PassTheme.typography.body3Norm(),
                     color = ProtonTheme.colors.notificationError
                 )
