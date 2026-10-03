@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importer</string>
+    <string name="importation_file_label">Fil</string>
+    <string name="importation_file_placeholder">Velg en fil</string>
+    <string name="importation_master_password_label">Hovedpassord</string>
+    <string name="importation_master_password_placeholder">Skriv inn hovedpassordet ditt</string>
+    <string name="importation_next_button">Neste</string>
+    <string name="importation_action_conceal_password">Skjul passord</string>
+    <string name="importation_action_reveal_password">Vis passord</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importer</string>
+    <string name="importation_error_generic">Importeringen mislyktes</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">가져오기</string>
+    <string name="importation_file_label">파일</string>
+    <string name="importation_file_placeholder">파일 선택</string>
+    <string name="importation_master_password_label">마스터 비밀번호</string>
+    <string name="importation_master_password_placeholder">마스터 비밀번호 입력</string>
+    <string name="importation_next_button">다음</string>
+    <string name="importation_action_conceal_password">비밀번호 숨기기</string>
+    <string name="importation_action_reveal_password">비밀번호 표시</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">가져오기</string>
+    <string name="importation_error_generic">가져오지 못했습니다</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importálás</string>
+    <string name="importation_file_label">Fájl</string>
+    <string name="importation_file_placeholder">Válasszon fájlt</string>
+    <string name="importation_master_password_label">Mesterjelszó</string>
+    <string name="importation_master_password_placeholder">Adja meg a mesterjelszavát</string>
+    <string name="importation_next_button">Tovább</string>
+    <string name="importation_action_conceal_password">Jelszó elrejtése</string>
+    <string name="importation_action_reveal_password">Jelszó megjelenítése</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importálás</string>
+    <string name="importation_error_generic">Az importálás nem sikerült</string>
+</resources>

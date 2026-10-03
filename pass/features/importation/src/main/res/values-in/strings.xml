@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Impor</string>
+    <string name="importation_file_label">File</string>
+    <string name="importation_file_placeholder">Pilih file</string>
+    <string name="importation_master_password_label">Kata sandi utama</string>
+    <string name="importation_master_password_placeholder">Masukkan kata sandi utama Anda</string>
+    <string name="importation_next_button">Berikutnya</string>
+    <string name="importation_action_conceal_password">Sembunyikan kata sandi</string>
+    <string name="importation_action_reveal_password">Tampilkan kata sandi</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Impor</string>
+    <string name="importation_error_generic">Impor gagal</string>
+</resources>

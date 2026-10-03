@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importeren</string>
+    <string name="importation_file_label">Bestand</string>
+    <string name="importation_file_placeholder">Selecteer een bestand</string>
+    <string name="importation_master_password_label">Hoofdwachtwoord</string>
+    <string name="importation_master_password_placeholder">Voer je hoofdwachtwoord in</string>
+    <string name="importation_next_button">Volgende</string>
+    <string name="importation_action_conceal_password">Wachtwoord verbergen</string>
+    <string name="importation_action_reveal_password">Wachtwoord weergeven</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importeren</string>
+    <string name="importation_error_generic">Importeren mislukt</string>
+</resources>

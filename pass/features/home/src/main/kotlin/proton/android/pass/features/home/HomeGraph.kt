@@ -29,6 +29,7 @@ import proton.android.pass.common.api.None
 import proton.android.pass.common.api.Option
 import proton.android.pass.commonuimodels.api.ItemTypeUiState
 import proton.android.pass.composecomponents.impl.dialogs.PassUpgradePlanDialog
+import proton.android.pass.features.home.bottomsheet.ImportSuccessBottomSheetContent
 import proton.android.pass.domain.FolderId
 import proton.android.pass.domain.InviteId
 import proton.android.pass.domain.InviteToken
@@ -38,6 +39,7 @@ import proton.android.pass.domain.inappmessages.InAppMessageId
 import proton.android.pass.domain.items.ItemCategory
 import proton.android.pass.navigation.api.NavItem
 import proton.android.pass.navigation.api.NavItemType
+import proton.android.pass.navigation.api.bottomSheet
 import proton.android.pass.navigation.api.composable
 import proton.android.pass.navigation.api.dialog
 
@@ -51,6 +53,12 @@ data object HomeNavItem : NavItem(
 object HomeUpgradeDialog : NavItem(
     baseRoute = "home/upgrade/dialog",
     navItemType = NavItemType.Dialog
+)
+
+object HomeImportSuccessBottomSheetNavItem : NavItem(
+    baseRoute = "home/import/success/bottomsheet",
+    navItemType = NavItemType.Bottomsheet,
+    noHistory = true
 )
 
 fun NavGraphBuilder.homeGraph(onNavigateEvent: (HomeNavigation) -> Unit) {
@@ -79,6 +87,12 @@ fun NavGraphBuilder.homeGraph(onNavigateEvent: (HomeNavigation) -> Unit) {
             onUpgrade = { onNavigateEvent(HomeNavigation.Upgrade) }
         )
     }
+
+    bottomSheet(HomeImportSuccessBottomSheetNavItem) {
+        ImportSuccessBottomSheetContent(
+            onClose = { onNavigateEvent(HomeNavigation.CloseImportSuccessBottomSheet) }
+        )
+    }
 }
 
 sealed interface HomeNavigation {
@@ -90,6 +104,7 @@ sealed interface HomeNavigation {
     ) : HomeNavigation
 
     data object CloseScreen : HomeNavigation
+    data object CloseImportSuccessBottomSheet : HomeNavigation
 
     data class EditLogin(val shareId: ShareId, val itemId: ItemId) : HomeNavigation
 

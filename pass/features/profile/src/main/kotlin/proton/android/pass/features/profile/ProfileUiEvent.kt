@@ -37,6 +37,8 @@ sealed interface ProfileUiEvent {
 
     data object OnImportExportClick : ProfileUiEvent
 
+    data object OnImportKeepassClick : ProfileUiEvent
+
     data object OnRateAppClick : ProfileUiEvent
 
     data object OnSettingsClick : ProfileUiEvent

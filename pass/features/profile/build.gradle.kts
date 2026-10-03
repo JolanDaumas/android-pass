@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.core.user.domain)
     implementation(libs.kotlinx.collections)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotpass)
 
     debugImplementation(libs.androidx.compose.uiTooling)
     implementation(libs.androidx.compose.uiToolingPreview)

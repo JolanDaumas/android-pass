@@ -18,15 +18,21 @@
 
 package proton.android.pass.features.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import me.proton.core.compose.theme.ProtonTheme
 import me.proton.core.compose.theme.defaultSmallWeak
 import proton.android.pass.commonui.api.PassTheme
@@ -41,6 +47,7 @@ fun HelpCenterProfileSection(
     modifier: Modifier = Modifier,
     onFeedbackClick: () -> Unit,
     onImportExportClick: () -> Unit,
+    onImportKeepassClick: () -> Unit,
     onTutorialClick: () -> Unit
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
@@ -63,9 +70,23 @@ fun HelpCenterProfileSection(
             )
             PassDivider()
             SettingOption(
+                text = stringResource(R.string.profile_option_import_keepass),
+                onClick = onImportKeepassClick,
+                leadingIcon = {
+                    Image(
+                        modifier = Modifier
+                            .padding(end = 21.dp)
+                            .width(40.dp),
+                        painter = painterResource(R.drawable.keepass_icon),
+                        contentDescription = null
+                    )
+                }
+            )
+            PassDivider()
+            SettingOption(
                 text = stringResource(R.string.profile_option_tutorial),
                 isLink = true,
-                onClick = onTutorialClick
+                onClick = onTutorialClick,
             )
         }
     }
@@ -79,6 +100,7 @@ fun HelpCenterSectionPreview(@PreviewParameter(ThemePreviewProvider::class) isDa
             HelpCenterProfileSection(
                 onFeedbackClick = {},
                 onImportExportClick = {},
+                onImportKeepassClick = {},
                 onTutorialClick = {}
             )
         }

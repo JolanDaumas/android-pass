@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">İçe aktar</string>
+    <string name="importation_file_label">Dosya</string>
+    <string name="importation_file_placeholder">Bir dosya seçin</string>
+    <string name="importation_master_password_label">Ana parola</string>
+    <string name="importation_master_password_placeholder">Ana parolanızı girin</string>
+    <string name="importation_next_button">İleri</string>
+    <string name="importation_action_conceal_password">Parolayı gizle</string>
+    <string name="importation_action_reveal_password">Parolayı göster</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">İçe aktar</string>
+    <string name="importation_error_generic">İçe aktarma başarısız oldu</string>
+</resources>
