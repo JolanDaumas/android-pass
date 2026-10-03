@@ -18,48 +18,12 @@
 
 package proton.android.pass.features.importation.presentation
 
-import proton.android.pass.domain.ImportedEntry
-import proton.android.pass.domain.ImportedGroup
-import proton.android.pass.domain.ImportedVault
+import androidx.compose.runtime.Immutable
 
-data class SelectableGroup(
-    val uuid: String,
-    val name: String,
-    val isSelected: Boolean = true,
-    val groups: List<SelectableGroup> = emptyList(),
-    val entries: List<SelectableEntry> = emptyList()
-)
-
-data class SelectableEntry(
+@Immutable
+data class SelectableEntryUiModel(
     val uuid: String,
     val title: String,
     val userName: String,
     val isSelected: Boolean = true
 )
-
-fun ImportedVault.toSelectableGroups(): List<SelectableGroup> {
-    return groups.map { it.toSelectableGroup() }
-}
-
-fun ImportedVault.toSelectableEntries(): List<SelectableEntry> {
-    return entries.map { it.toSelectableEntry() }
-}
-
-fun ImportedGroup.toSelectableGroup(): SelectableGroup {
-    return SelectableGroup(
-        uuid = uuid,
-        name = name,
-        isSelected = true,
-        groups = groups.map { it.toSelectableGroup() },
-        entries = entries.map { it.toSelectableEntry() }
-    )
-}
-
-fun ImportedEntry.toSelectableEntry(): SelectableEntry {
-    return SelectableEntry(
-        uuid = uuid,
-        title = title,
-        userName = userName,
-        isSelected = true
-    )
-}

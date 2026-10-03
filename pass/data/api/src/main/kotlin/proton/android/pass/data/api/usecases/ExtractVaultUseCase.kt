@@ -16,11 +16,11 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.data.api.repositories
+package proton.android.pass.data.api.usecases
 
-import proton.android.pass.domain.ImportedVault
+import proton.android.pass.domain.ExtractedVault
 import java.net.URI
 
-interface ImportationRepository {
-    suspend fun importVault(uri: URI, masterPassword: String): Result<ImportedVault>
+interface ExtractVaultUseCase {
+    suspend operator fun invoke(uri: URI, masterPassword: String): Result<ExtractedVault>
 }

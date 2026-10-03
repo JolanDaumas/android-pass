@@ -16,10 +16,18 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.data.api.usecases
+package proton.android.pass.data.impl.usecases
 
-import proton.android.pass.domain.ImportedEntry
+import proton.android.pass.data.api.repositories.VaultExtractionRepository
+import proton.android.pass.data.api.usecases.ExtractVaultUseCase
+import proton.android.pass.domain.ExtractedVault
+import java.net.URI
+import javax.inject.Inject
 
-interface ImportSelectedPasswordsUseCase {
-    suspend operator fun invoke(entries: List<ImportedEntry>): Result<Unit>
+class ExtractVaultUseCaseImpl @Inject constructor(
+    private val vaultExtractionRepository: VaultExtractionRepository
+) : ExtractVaultUseCase {
+    override suspend fun invoke(uri: URI, masterPassword: String): Result<ExtractedVault> {
+        return vaultExtractionRepository.extractVault(uri, masterPassword)
+    }
 }

@@ -18,16 +18,51 @@
 
 package proton.android.pass.data.impl.usecases
 
-import proton.android.pass.data.api.repositories.ImportationRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import proton.android.pass.data.api.usecases.CreateItem
+import proton.android.pass.data.api.usecases.ImportVaultResult
 import proton.android.pass.data.api.usecases.ImportVaultUseCase
-import proton.android.pass.domain.ImportedVault
-import java.net.URI
+import proton.android.pass.data.api.usecases.defaultvault.ObserveDefaultVault
+import proton.android.pass.domain.ItemContents
 import javax.inject.Inject
 
 class ImportVaultUseCaseImpl @Inject constructor(
-    private val importationRepository: ImportationRepository
+    private val createItem: CreateItem,
+    private val observeDefaultVault: ObserveDefaultVault
 ) : ImportVaultUseCase {
-    override suspend fun invoke(uri: URI, masterPassword: String): Result<ImportedVault> {
-        return importationRepository.importVault(uri, masterPassword)
+
+    override fun invoke(
+        entries: List<ItemContents.Login>
+    ): Flow<ImportVaultResult> = channelFlow {
+        send(ImportVaultResult.Started)
+        if (entries.isEmpty()) {
+            send(ImportVaultResult.Failed)
+            return@channelFlow
+        }
+        val defaultVault = observeDefaultVault().first().value()
+            ?: error("No writable default vault is available")
+        val folderId = defaultVault.folderId.value()
+
+        val imports = entries.mapIndexed { index, itemContents ->
+            val uuid = index.toString()
+            val progress = index.toFloat() / entries.size
+            send(ImportVaultResult.Uploading(uuid, progress))
+
+            async {
+                createItem(
+                    shareId = defaultVault.shareId,
+                    folderId = folderId,
+                    itemContents = itemContents
+                )
+                send(ImportVaultResult.ItemImported(uuid, (index + 1f) / entries.size))
+            }
+        }
+        imports.awaitAll()
+        send(ImportVaultResult.Imported)
     }
+
 }

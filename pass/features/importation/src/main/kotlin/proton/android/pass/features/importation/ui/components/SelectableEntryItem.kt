@@ -37,13 +37,13 @@ import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
-import proton.android.pass.features.importation.presentation.SelectableEntry
+import proton.android.pass.features.importation.presentation.SelectableEntryUiModel
 import me.proton.core.presentation.R as CoreR
 
 @Composable
 fun SelectableEntryItem(
     modifier: Modifier = Modifier,
-    entry: SelectableEntry,
+    entry: SelectableEntryUiModel,
     onEvent: (ImportationUiEvent) -> Unit,
     depth: Int = 0
 ) {
@@ -88,7 +88,7 @@ fun SelectableEntryItem(
 private fun SelectableEntryItemPreview() {
     PassTheme {
         SelectableEntryItem(
-            entry = SelectableEntry(
+            entry = SelectableEntryUiModel(
                 uuid = "1",
                 title = "GitHub",
                 userName = "user@proton.me",

@@ -23,18 +23,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import proton.android.pass.data.api.usecases.ImportSelectedPasswordsUseCase
+import proton.android.pass.data.api.usecases.ExtractVaultUseCase
+import proton.android.pass.data.api.usecases.ImportVaultResult
 import proton.android.pass.data.api.usecases.ImportVaultUseCase
-import proton.android.pass.domain.ImportedEntry
-import proton.android.pass.domain.ImportedGroup
-import proton.android.pass.domain.ImportedVault
 import proton.android.pass.features.importation.R
 import java.net.URI
 import javax.inject.Inject
@@ -42,13 +39,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ImportationViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val importVaultUseCase: ImportVaultUseCase,
-    private val importSelectedPasswordsUseCase: ImportSelectedPasswordsUseCase
+    private val extractVaultUseCase: ExtractVaultUseCase,
+    private val importVaultUseCase: ImportVaultUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ImportationUiState())
     val state: StateFlow<ImportationUiState> = _state.asStateFlow()
-    private var importedEntriesByUuid: Map<String, ImportedEntry> = emptyMap()
 
     fun onEvent(event: ImportationUiEvent) {
         when (event) {
@@ -57,10 +53,12 @@ class ImportationViewModel @Inject constructor(
                     it.copy(
                         selectedFileUri = event.uri,
                         selectedFileName = event.fileName,
-                        fileError = null
+                        fileError = null,
+                        importedEntries = emptyList(),
+                        selectableEntries = emptyList(),
+                        importProgressEntries = emptyList()
                     )
                 }
-                importedEntriesByUuid = emptyMap()
             }
 
             is ImportationUiEvent.OnPasswordChange -> {
@@ -78,29 +76,13 @@ class ImportationViewModel @Inject constructor(
                 }
             }
 
-            is ImportationUiEvent.OnToggleGroupSelection -> {
-                _state.update { state ->
-                    val (newGroups, newEntries) = updateGroupAndEntrySelection(
-                        state.selectableGroups,
-                        state.selectableEntries,
-                        event.uuid,
-                        event.isSelected,
-                        isGroup = true
-                    )
-                    state.copy(selectableGroups = newGroups, selectableEntries = newEntries)
-                }
-            }
-
             is ImportationUiEvent.OnToggleEntrySelection -> {
                 _state.update { state ->
-                    val (newGroups, newEntries) = updateGroupAndEntrySelection(
-                        state.selectableGroups,
-                        state.selectableEntries,
-                        event.uuid,
-                        event.isSelected,
-                        isGroup = false
+                    state.copy(
+                        selectableEntries = state.selectableEntries.map { entry ->
+                            if (entry.uuid == event.uuid) entry.copy(isSelected = event.isSelected) else entry
+                        }
                     )
-                    state.copy(selectableGroups = newGroups, selectableEntries = newEntries)
                 }
             }
 
@@ -117,17 +99,16 @@ class ImportationViewModel @Inject constructor(
                             importError = null
                         )
                     }
-                    val result = importVaultUseCase(URI(uri.toString()), password)
+                    val result = extractVaultUseCase(URI(uri.toString()), password)
                     result.fold(
-                        onSuccess = { vault ->
-                            importedEntriesByUuid = vault.allEntries().associateBy(ImportedEntry::uuid)
+                        onSuccess = { entries ->
+                            val extractedItems = entries.extractedItems
                             _state.update {
                                 it.copy(
                                     isLoading = false,
                                     step = ImportationStep.SelectItems,
-                                    vaultName = vault.name,
-                                    selectableGroups = vault.toSelectableGroups(),
-                                    selectableEntries = vault.toSelectableEntries()
+                                    importedEntries = extractedItems,
+                                    selectableEntries = extractedItems.toSelectableEntryUiModels()
                                 )
                             }
                         },
@@ -147,72 +128,82 @@ class ImportationViewModel @Inject constructor(
             ImportationUiEvent.OnConfirmSelection -> {
                 val currentState = _state.value
                 if (currentState.isLoading || !currentState.isSubmitEnabled) return
-                val selectedEntries = currentState.selectableEntries()
-                    .filter(SelectableEntry::isSelected)
-                    .mapNotNull { importedEntriesByUuid[it.uuid] }
-                val previousProgressByUuid = currentState.importProgressEntries.associateBy(ImportProgressEntry::uuid)
-                val entriesToUpload = selectedEntries.filter { entry ->
-                    previousProgressByUuid[entry.uuid]?.status != ImportProgressStatus.Imported
-                }
+                val selectedEntryUuids = currentState.selectableEntries
+                    .filter(SelectableEntryUiModel::isSelected)
+                    .map(SelectableEntryUiModel::uuid)
+                    .toSet()
+                val entries = currentState.importedEntries.selectEntries(selectedEntryUuids)
+                if (entries.isEmpty()) return
                 viewModelScope.launch {
                     _state.update {
                         it.copy(
                             step = ImportationStep.UploadEntries,
                             isLoading = true,
                             importError = null,
-                            importProgressEntries = selectedEntries.map { entry ->
+                            importProgressEntries = entries.indices.map { index ->
+                                val uuid = index.toString()
                                 ImportProgressEntry(
-                                    uuid = entry.uuid,
-                                    status = previousProgressByUuid[entry.uuid]
-                                        ?.status
-                                        ?.takeIf { status -> status == ImportProgressStatus.Imported }
-                                        ?: ImportProgressStatus.Pending
+                                    uuid = uuid
                                 )
                             }
                         )
                     }
 
-                    if (entriesToUpload.isEmpty()) {
-                        importedEntriesByUuid = emptyMap()
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                isImportComplete = true
-                            )
-                        }
-                        return@launch
-                    }
-
-                    val uploadFailures = entriesToUpload.map { entry ->
-                        async {
-                            updateImportProgress(entry.uuid, ImportProgressStatus.Uploading)
-                            importSelectedPasswordsUseCase(listOf(entry)).fold(
-                                onSuccess = {
-                                    updateImportProgress(entry.uuid, ImportProgressStatus.Imported)
-                                    false
-                                },
-                                onFailure = {
-                                    updateImportProgress(entry.uuid, ImportProgressStatus.Failed)
-                                    true
+                    try {
+                        var isImportComplete = false
+                        importVaultUseCase(entries).collect { result ->
+                            when (result) {
+                                ImportVaultResult.Started -> Unit
+                                is ImportVaultResult.Uploading ->
+                                    updateImportProgress(result.uuid, ImportProgressStatus.Uploading)
+                                is ImportVaultResult.ItemImported ->
+                                    updateImportProgress(result.uuid, ImportProgressStatus.Imported)
+                                ImportVaultResult.Imported -> {
+                                    isImportComplete = true
+                                    _state.update { state ->
+                                        state.copy(
+                                            isLoading = false,
+                                            isImportComplete = true,
+                                            importProgressEntries = state.importProgressEntries.map {
+                                                it.copy(status = ImportProgressStatus.Imported)
+                                            }
+                                        )
+                                    }
                                 }
-                            )
+                                ImportVaultResult.Failed -> Unit
+                            }
                         }
-                    }.awaitAll()
-
-                    if (uploadFailures.any { it }) {
+                        if (!isImportComplete) {
+                            _state.update {
+                                it.copy(
+                                    step = ImportationStep.SelectItems,
+                                    isLoading = false,
+                                    importError = context.getString(R.string.importation_error_import),
+                                    importProgressEntries = it.importProgressEntries.map { progressEntry ->
+                                        if (progressEntry.status == ImportProgressStatus.Imported) {
+                                            progressEntry
+                                        } else {
+                                            progressEntry.copy(status = ImportProgressStatus.Failed)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    } catch (exception: CancellationException) {
+                        throw exception
+                    } catch (exception: Exception) {
                         _state.update {
                             it.copy(
                                 step = ImportationStep.SelectItems,
                                 isLoading = false,
-                                importError = context.getString(R.string.importation_error_import)
-                            )
-                        }
-                    } else {
-                        importedEntriesByUuid = emptyMap()
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                isImportComplete = true
+                                importError = context.getString(R.string.importation_error_import),
+                                importProgressEntries = it.importProgressEntries.map { progressEntry ->
+                                    if (progressEntry.status == ImportProgressStatus.Imported) {
+                                        progressEntry
+                                    } else {
+                                        progressEntry.copy(status = ImportProgressStatus.Failed)
+                                    }
+                                }
                             )
                         }
                     }
@@ -234,53 +225,6 @@ class ImportationViewModel @Inject constructor(
         }
     }
 
-    private fun updateGroupAndEntrySelection(
-        groups: List<SelectableGroup>,
-        entries: List<SelectableEntry>,
-        uuid: String,
-        isSelected: Boolean,
-        isGroup: Boolean
-    ): Pair<List<SelectableGroup>, List<SelectableEntry>> {
-        if (isGroup) {
-            val newGroups = groups.map { group ->
-                if (group.uuid == uuid) {
-                    cascadeSelectGroup(group, isSelected)
-                } else {
-                    val (subGroups, subEntries) = updateGroupAndEntrySelection(group.groups, group.entries, uuid, isSelected, true)
-                    group.copy(groups = subGroups, entries = subEntries)
-                }
-            }
-            return newGroups to entries
-        } else {
-            val newEntries = entries.map { if (it.uuid == uuid) it.copy(isSelected = isSelected) else it }
-            val newGroups = groups.map { group ->
-                val (subGroups, subEntries) = updateGroupAndEntrySelection(group.groups, group.entries, uuid, isSelected, false)
-                group.copy(groups = subGroups, entries = subEntries)
-            }
-            return newGroups to newEntries
-        }
-    }
-
-    private fun cascadeSelectGroup(group: SelectableGroup, isSelected: Boolean): SelectableGroup {
-        return group.copy(
-            isSelected = isSelected,
-            groups = group.groups.map { cascadeSelectGroup(it, isSelected) },
-            entries = group.entries.map { it.copy(isSelected = isSelected) }
-        )
-    }
-
-    private fun ImportedVault.allEntries(): List<ImportedEntry> =
-        entries + groups.flatMap { it.allEntries() }
-
-    private fun ImportedGroup.allEntries(): List<ImportedEntry> =
-        entries + groups.flatMap { it.allEntries() }
-
-    private fun ImportationUiState.selectableEntries(): List<SelectableEntry> =
-        selectableEntries + selectableGroups.flatMap { it.allEntries() }
-
-    private fun SelectableGroup.allEntries(): List<SelectableEntry> =
-        entries + groups.flatMap { it.allEntries() }
-
     private fun updateImportProgress(uuid: String, status: ImportProgressStatus) {
         _state.update { state ->
             state.copy(
@@ -290,4 +234,5 @@ class ImportationViewModel @Inject constructor(
             )
         }
     }
+
 }

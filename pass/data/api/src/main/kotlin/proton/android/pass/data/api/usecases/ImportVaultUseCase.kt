@@ -18,9 +18,32 @@
 
 package proton.android.pass.data.api.usecases
 
-import proton.android.pass.domain.ImportedVault
-import java.net.URI
+import kotlinx.coroutines.flow.Flow
+import proton.android.pass.domain.ItemContents
 
 interface ImportVaultUseCase {
-    suspend operator fun invoke(uri: URI, masterPassword: String): Result<ImportedVault>
+    operator fun invoke(
+        entries: List<ItemContents.Login>
+    ): Flow<ImportVaultResult>
+}
+
+sealed class ImportVaultResult(
+    open val progress: Float
+) {
+
+    data object Started : ImportVaultResult(0.0f)
+
+    data class Uploading(
+        val uuid: String,
+        override val progress: Float
+    ) : ImportVaultResult(progress = progress)
+
+    data class ItemImported(
+        val uuid: String,
+        override val progress: Float
+    ) : ImportVaultResult(progress = progress)
+
+    data object Imported : ImportVaultResult(1.0f)
+
+    data object Failed : ImportVaultResult(1.0f)
 }

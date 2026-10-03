@@ -20,6 +20,7 @@ package proton.android.pass.features.importation.presentation
 
 import android.net.Uri
 import androidx.compose.runtime.Immutable
+import proton.android.pass.domain.ItemContents
 
 @Immutable
 data class ImportationUiState(
@@ -33,14 +34,12 @@ data class ImportationUiState(
     val passwordError: String? = null,
     val importError: String? = null,
     val isImportComplete: Boolean = false,
-    val vaultName: String? = null,
-    val selectableGroups: List<SelectableGroup> = emptyList(),
-    val selectableEntries: List<SelectableEntry> = emptyList(),
+    val importedEntries: List<ItemContents.Login> = emptyList(),
+    val selectableEntries: List<SelectableEntryUiModel> = emptyList(),
     val importProgressEntries: List<ImportProgressEntry> = emptyList()
 ) {
     val selectedEntryCount: Int
-        get() = selectableEntries.count { it.isSelected } +
-            selectableGroups.sumOf { it.selectedEntryCount() }
+        get() = selectableEntries.count { it.isSelected }
 
     val isSubmitEnabled: Boolean
         get() = when (step) {
@@ -62,6 +61,3 @@ enum class ImportProgressStatus {
     Imported,
     Failed
 }
-
-private fun SelectableGroup.selectedEntryCount(): Int =
-    entries.count { it.isSelected } + groups.sumOf { it.selectedEntryCount() }

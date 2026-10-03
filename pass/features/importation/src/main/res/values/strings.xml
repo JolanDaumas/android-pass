@@ -31,4 +31,5 @@
     <string name="importation_error_generic">Import failed</string>
     <string name="importation_error_import">Could not import the selected passwords</string>
     <string name="importation_progress_title">Importing</string>
+    <string name="importation_default_vault_name">Imported folder</string>
 </resources>

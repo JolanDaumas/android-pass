@@ -46,11 +46,8 @@ import proton.android.pass.composecomponents.impl.topbar.BackArrowTopAppBar
 import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.ImportationUiState
-import proton.android.pass.features.importation.presentation.SelectableEntry
-import proton.android.pass.features.importation.presentation.SelectableGroup
-import proton.android.pass.features.importation.ui.components.rememberAccordionState
+import proton.android.pass.features.importation.presentation.SelectableEntryUiModel
 import proton.android.pass.features.importation.ui.components.SelectableEntryItem
-import proton.android.pass.features.importation.ui.components.SelectableGroupItem
 
 @Composable
 fun ImportationSelectionContent(
@@ -59,8 +56,6 @@ fun ImportationSelectionContent(
     onEvent: (ImportationUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val accordionState = rememberAccordionState()
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -96,9 +91,9 @@ fun ImportationSelectionContent(
         ) {
             Spacer(modifier = Modifier.height(Spacing.small))
 
-            if (state.vaultName != null) {
+            if (state.selectedFileName != null) {
                 Text(
-                    text = state.vaultName,
+                    text = state.selectedFileName,
                     style = PassTheme.typography.heroNorm(),
                     color = ProtonTheme.colors.textNorm
                 )
@@ -120,19 +115,10 @@ fun ImportationSelectionContent(
                     .padding(Spacing.medium),
                 verticalArrangement = Arrangement.spacedBy(Spacing.small)
             ) {
-                state.selectableGroups.forEach { group ->
-                    key(group.uuid) {
-                        SelectableGroupItem(
-                            group = group,
-                            onEvent = onEvent,
-                            accordionState = accordionState,
-                            depth = 0
-                        )
-                    }
-                }
-
                 state.selectableEntries.forEach { entry ->
-                    SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
+                    key(entry.uuid) {
+                        SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
+                    }
                 }
             }
         }
@@ -145,19 +131,10 @@ private fun ImportationSelectionContentPreview() {
     PassTheme {
         ImportationSelectionContent(
             state = ImportationUiState(
-                vaultName = "My KeePass Vault",
-                selectableGroups = listOf(
-                    SelectableGroup(
-                        uuid = "1",
-                        name = "Social",
-                        isSelected = true,
-                        entries = listOf(
-                            SelectableEntry(uuid = "2", title = "Twitter", userName = "user", isSelected = true)
-                        )
-                    )
-                ),
+                selectedFileName = "My KeePass Database",
                 selectableEntries = listOf(
-                    SelectableEntry(uuid = "3", title = "Bank", userName = "client", isSelected = true)
+                    SelectableEntryUiModel(uuid = "2", title = "Twitter", userName = "user", isSelected = true),
+                    SelectableEntryUiModel(uuid = "3", title = "Bank", userName = "client", isSelected = true)
                 )
             ),
             onEvent = {},

@@ -16,26 +16,11 @@
  * along with Proton Pass.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package proton.android.pass.domain
+package proton.android.pass.data.api.repositories
 
-data class ImportedVault(
-    val name: String,
-    val groups: List<ImportedGroup>,
-    val entries: List<ImportedEntry>
-)
+import proton.android.pass.domain.ExtractedVault
+import java.net.URI
 
-data class ImportedGroup(
-    val uuid: String,
-    val name: String,
-    val groups: List<ImportedGroup>,
-    val entries: List<ImportedEntry>
-)
-
-data class ImportedEntry(
-    val uuid: String,
-    val title: String,
-    val userName: String,
-    val password: String,
-    val url: String,
-    val notes: String
-)
+interface VaultExtractionRepository {
+    suspend fun extractVault(uri: URI, masterPassword: String): Result<ExtractedVault>
+}
