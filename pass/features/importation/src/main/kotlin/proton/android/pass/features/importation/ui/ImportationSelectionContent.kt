@@ -130,7 +130,7 @@ fun ImportationSelectionContent(
 private fun ImportationSelectionContentPreview() {
     PassTheme {
         ImportationSelectionContent(
-            state = ImportationUiState(
+            state = ImportationUiState.initial().copy(
                 selectedFileName = "My KeePass Database",
                 selectableEntries = listOf(
                     SelectableEntryUiModel(uuid = "2", title = "Twitter", userName = "user", isSelected = true),

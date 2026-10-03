@@ -258,7 +258,7 @@ private fun getFileName(context: Context, uri: Uri): String? {
 private fun ImportationContentPreview() {
     PassTheme {
         ImportationContent(
-            state = ImportationUiState(
+            state = ImportationUiState.initial().copy(
                 selectedFileName = "passwords_export.csv",
                 masterPassword = "secret_password"
             ),

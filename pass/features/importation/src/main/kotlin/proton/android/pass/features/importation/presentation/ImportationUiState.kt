@@ -23,19 +23,36 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class ImportationUiState(
-    val step: ImportationStep = ImportationStep.InputCredentials,
-    val selectedFileUri: Uri? = null,
-    val selectedFileName: String? = null,
-    val masterPassword: String = "",
-    val isPasswordVisible: Boolean = false,
-    val isLoading: Boolean = false,
-    val fileError: ImportationUiError? = null,
-    val passwordError: ImportationUiError? = null,
-    val importError: ImportationUiError? = null,
-    val isImportComplete: Boolean = false,
-    val selectableEntries: List<SelectableEntryUiModel> = emptyList(),
-    val importProgressEntries: List<ImportProgressEntry> = emptyList()
+    val step: ImportationStep,
+    val selectedFileUri: Uri?,
+    val selectedFileName: String?,
+    val masterPassword: String,
+    val isPasswordVisible: Boolean,
+    val isLoading: Boolean,
+    val fileError: ImportationUiError?,
+    val passwordError: ImportationUiError?,
+    val importError: ImportationUiError?,
+    val isImportComplete: Boolean,
+    val selectableEntries: List<SelectableEntryUiModel>,
+    val importProgressEntries: List<ImportProgressEntry>
 ) {
+    companion object {
+        fun initial(): ImportationUiState = ImportationUiState(
+            step = ImportationStep.InputCredentials,
+            selectedFileUri = null,
+            selectedFileName = null,
+            masterPassword = "",
+            isPasswordVisible = false,
+            isLoading = false,
+            fileError = null,
+            passwordError = null,
+            importError = null,
+            isImportComplete = false,
+            selectableEntries = emptyList(),
+            importProgressEntries = emptyList()
+        )
+    }
+
     val selectedEntryCount: Int
         get() = selectableEntries.count { it.isSelected }
 

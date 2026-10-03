@@ -69,7 +69,7 @@ class ImportationViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ImportationUiState()
+        initialValue = ImportationUiState.initial()
     )
 
     fun onFileSelected(uri: Uri, fileName: String?) {
