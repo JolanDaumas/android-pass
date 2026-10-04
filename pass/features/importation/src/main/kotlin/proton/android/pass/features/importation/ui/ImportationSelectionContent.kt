@@ -20,17 +20,17 @@ package proton.android.pass.features.importation.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,9 +39,7 @@ import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
 import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
-import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
 import proton.android.pass.composecomponents.impl.pinning.PinItem
-import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.presentation.ImportationUiError
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.SelectableEntryUiModel
@@ -55,87 +53,86 @@ fun ImportationSelectionContent(
     selectableEntries: List<SelectableEntryUiModel>,
     onEvent: (ImportationUiEvent) -> Unit
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = Spacing.medium)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+            .padding(horizontal = Spacing.medium),
+        contentPadding = PaddingValues(
+            top = Spacing.small,
+            bottom = Spacing.medium
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.small)
     ) {
-        Spacer(modifier = Modifier.height(Spacing.small))
+        item(key = "header") {
+            Column {
+                if (selectedFileName != null) {
+                    Text(
+                        text = selectedFileName,
+                        style = PassTheme.typography.heroNorm(),
+                        color = ProtonTheme.colors.textNorm
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.extraSmall))
+                }
 
-        if (selectedFileName != null) {
-            Text(
-                text = selectedFileName,
-                style = PassTheme.typography.heroNorm(),
-                color = ProtonTheme.colors.textNorm
-            )
-            Spacer(modifier = Modifier.height(Spacing.extraSmall))
+                importError?.let { error ->
+                    Text(
+                        text = error.asText(),
+                        style = PassTheme.typography.body3Norm(),
+                        color = ProtonTheme.colors.notificationError
+                    )
+                }
+            }
         }
 
-        importError?.let { error ->
-            Text(
-                text = error.asText(),
-                style = PassTheme.typography.body3Norm(),
-                color = ProtonTheme.colors.notificationError
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.medium),
-            verticalArrangement = Arrangement.spacedBy(Spacing.small)
-        ) {
-            selectableEntries.forEach { entry ->
-                key(entry.uuid) {
-                    PinItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        item = entry.toPinItemUiModel(),
-                        canLoadExternalImages = false,
-                        onItemClick = {
+        items(
+            items = selectableEntries,
+            key = { entry -> "entry:${entry.uuid}" }
+        ) { entry ->
+            PinItem(
+                modifier = Modifier.fillMaxWidth(),
+                item = entry.toPinItemUiModel(),
+                canLoadExternalImages = false,
+                onItemClick = {
+                    onEvent(
+                        ImportationUiEvent.OnToggleEntrySelection(
+                            entry.uuid,
+                            !entry.isSelected
+                        )
+                    )
+                },
+                content = {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = Spacing.extraSmall),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = entry.title,
+                            style = PassTheme.typography.body3Norm(),
+                            color = ProtonTheme.colors.textNorm
+                        )
+                        if (entry.userName.isNotEmpty()) {
+                            Text(
+                                text = entry.userName,
+                                style = PassTheme.typography.body3Norm(),
+                                color = ProtonTheme.colors.textWeak
+                            )
+                        }
+                    }
+                    Checkbox(
+                        checked = entry.isSelected,
+                        onCheckedChange = { isChecked ->
                             onEvent(
                                 ImportationUiEvent.OnToggleEntrySelection(
                                     entry.uuid,
-                                    !entry.isSelected
+                                    isChecked
                                 )
-                            )
-                        },
-                        content = {
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(vertical = Spacing.extraSmall),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                Text(
-                                    text = entry.title,
-                                    style = PassTheme.typography.body3Norm(),
-                                    color = ProtonTheme.colors.textNorm
-                                )
-                                if (entry.userName.isNotEmpty()) {
-                                    Text(
-                                        text = entry.userName,
-                                        style = PassTheme.typography.body3Norm(),
-                                        color = ProtonTheme.colors.textWeak
-                                    )
-                                }
-                            }
-                            Checkbox(
-                                checked = entry.isSelected,
-                                onCheckedChange = { isChecked ->
-                                    onEvent(
-                                        ImportationUiEvent.OnToggleEntrySelection(
-                                            entry.uuid,
-                                            isChecked
-                                        )
-                                    )
-                                }
                             )
                         }
                     )
                 }
-            }
+            )
         }
     }
 }
