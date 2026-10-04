@@ -46,10 +46,6 @@ class ImportVaultUseCaseImpl @Inject constructor(
         entries: List<ExtractedItem>
     ): Flow<ImportVaultResult> = channelFlow {
         send(ImportVaultResult.Started)
-        if (entries.isEmpty()) {
-            send(ImportVaultResult.Failed)
-            return@channelFlow
-        }
         val defaultVault = observeDefaultVault().first().value()
             ?: error("No writable default vault is available")
         val folderId = defaultVault.folderId.value()
