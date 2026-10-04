@@ -24,28 +24,28 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import me.proton.core.compose.theme.ProtonTheme
 import proton.android.pass.commonui.api.PassTheme
 import proton.android.pass.commonui.api.Spacing
-import proton.android.pass.commonui.api.body3Bold
 import proton.android.pass.commonui.api.body3Norm
 import proton.android.pass.commonui.api.heroNorm
 import proton.android.pass.composecomponents.impl.container.roundedContainerNorm
+import proton.android.pass.composecomponents.impl.pinning.PinItem
 import proton.android.pass.features.importation.R
 import proton.android.pass.features.importation.presentation.ImportationUiError
 import proton.android.pass.features.importation.presentation.ImportationUiEvent
 import proton.android.pass.features.importation.presentation.SelectableEntryUiModel
-import proton.android.pass.features.importation.ui.components.SelectableEntryItem
+import proton.android.pass.features.importation.presentation.toPinItemUiModel
 
 @Composable
 fun ImportationSelectionContent(
@@ -83,14 +83,57 @@ fun ImportationSelectionContent(
 
         Column(
             modifier = Modifier
-                .roundedContainerNorm()
                 .fillMaxWidth()
                 .padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small)
         ) {
             selectableEntries.forEach { entry ->
                 key(entry.uuid) {
-                    SelectableEntryItem(entry = entry, onEvent = onEvent, depth = 0)
+                    PinItem(
+                        modifier = Modifier.fillMaxWidth(),
+                        item = entry.toPinItemUiModel(),
+                        canLoadExternalImages = false,
+                        onItemClick = {
+                            onEvent(
+                                ImportationUiEvent.OnToggleEntrySelection(
+                                    entry.uuid,
+                                    !entry.isSelected
+                                )
+                            )
+                        },
+                        content = {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = Spacing.extraSmall),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = entry.title,
+                                    style = PassTheme.typography.body3Norm(),
+                                    color = ProtonTheme.colors.textNorm
+                                )
+                                if (entry.userName.isNotEmpty()) {
+                                    Text(
+                                        text = entry.userName,
+                                        style = PassTheme.typography.body3Norm(),
+                                        color = ProtonTheme.colors.textWeak
+                                    )
+                                }
+                            }
+                            Checkbox(
+                                checked = entry.isSelected,
+                                onCheckedChange = { isChecked ->
+                                    onEvent(
+                                        ImportationUiEvent.OnToggleEntrySelection(
+                                            entry.uuid,
+                                            isChecked
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    )
                 }
             }
         }

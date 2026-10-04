@@ -18,9 +18,45 @@
 
 package proton.android.pass.features.importation.presentation
 
+import kotlinx.datetime.Instant
 import me.proton.core.crypto.common.keystore.EncryptedString
+import me.proton.core.domain.entity.UserId
+import proton.android.pass.commonuimodels.api.ItemUiModel
 import proton.android.pass.domain.ExtractedItem
 import proton.android.pass.domain.HiddenState
+import proton.android.pass.domain.ItemContents
+import proton.android.pass.domain.ItemId
+import proton.android.pass.domain.ItemState
+import proton.android.pass.domain.ShareId
+import proton.android.pass.domain.ShareType
+
+fun SelectableEntryUiModel.toPinItemUiModel(): ItemUiModel = ItemUiModel(
+    id = ItemId(uuid),
+    shareId = ShareId("importation"),
+    userId = UserId("importation"),
+    contents = ItemContents.Login(
+        title = title,
+        note = note,
+        customFields = emptyList(),
+        itemEmail = "",
+        itemUsername = userName,
+        password = HiddenState.Empty(""),
+        urls = urls,
+        packageInfoSet = emptySet(),
+        primaryTotp = HiddenState.Empty(""),
+        passkeys = emptyList(),
+        autofillUrls = emptyList()
+    ),
+    state = ItemState.Active.value,
+    createTime = Instant.fromEpochMilliseconds(0),
+    modificationTime = Instant.fromEpochMilliseconds(0),
+    lastAutofillTime = null,
+    isPinned = false,
+    pinTime = null,
+    revision = 0,
+    shareCount = 0,
+    shareType = ShareType.Vault
+)
 
 fun List<ExtractedItem>.toUiModel(
     decrypt: (EncryptedString) -> String
