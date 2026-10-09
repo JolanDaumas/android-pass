@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importar</string>
+    <string name="importation_file_label">Arquivo</string>
+    <string name="importation_file_placeholder">Selecionar um arquivo</string>
+    <string name="importation_master_password_label">Senha mestra</string>
+    <string name="importation_master_password_placeholder">Digite sua senha mestra</string>
+    <string name="importation_next_button">Avançar</string>
+    <string name="importation_action_conceal_password">Ocultar senha</string>
+    <string name="importation_action_reveal_password">Mostrar senha</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importar</string>
+    <string name="importation_error_generic">Falha ao importar</string>
+</resources>

@@ -123,6 +123,8 @@ sealed interface ProfileNavigation {
     value class AliasesSyncSettings(val shareId: ShareId?) : ProfileNavigation
 
     data object StorageFull : ProfileNavigation
+
+    data object Import: ProfileNavigation
 }
 
 fun NavGraphBuilder.profileGraph(onNavigateEvent: (ProfileNavigation) -> Unit) {

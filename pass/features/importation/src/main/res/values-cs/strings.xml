@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Importovat</string>
+    <string name="importation_file_label">Soubor</string>
+    <string name="importation_file_placeholder">Vyberte soubor</string>
+    <string name="importation_master_password_label">Hlavní heslo</string>
+    <string name="importation_master_password_placeholder">Zadejte hlavní heslo</string>
+    <string name="importation_next_button">Další</string>
+    <string name="importation_action_conceal_password">Skrýt heslo</string>
+    <string name="importation_action_reveal_password">Zobrazit heslo</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Importovat</string>
+    <string name="importation_error_generic">Import se nezdařil</string>
+</resources>

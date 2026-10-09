@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Nhập</string>
+    <string name="importation_file_label">Tệp</string>
+    <string name="importation_file_placeholder">Chọn tệp</string>
+    <string name="importation_master_password_label">Mật khẩu chính</string>
+    <string name="importation_master_password_placeholder">Nhập mật khẩu chính</string>
+    <string name="importation_next_button">Tiếp theo</string>
+    <string name="importation_action_conceal_password">Ẩn mật khẩu</string>
+    <string name="importation_action_reveal_password">Hiện mật khẩu</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Nhập</string>
+    <string name="importation_error_generic">Không thể nhập</string>
+</resources>

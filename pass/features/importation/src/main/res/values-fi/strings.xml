@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Tuo</string>
+    <string name="importation_file_label">Tiedosto</string>
+    <string name="importation_file_placeholder">Valitse tiedosto</string>
+    <string name="importation_master_password_label">Pääsalasana</string>
+    <string name="importation_master_password_placeholder">Anna pääsalasanasi</string>
+    <string name="importation_next_button">Seuraava</string>
+    <string name="importation_action_conceal_password">Piilota salasana</string>
+    <string name="importation_action_reveal_password">Näytä salasana</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Tuo</string>
+    <string name="importation_error_generic">Tuonti epäonnistui</string>
+</resources>

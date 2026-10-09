@@ -117,6 +117,7 @@ dependencies {
     implementation(projects.pass.protos)
     implementation(projects.pass.securityCenter.api)
     implementation(projects.pass.telemetry.api)
+    implementation(libs.kotpass)
 
     testImplementation(libs.core.test.kotlin)
     testImplementation(libs.junit)

@@ -92,6 +92,7 @@ fun ProfileScreen(
                 ProfileUiEvent.OnCopyAppVersionClick -> viewModel.copyAppVersion(state.appVersion)
                 ProfileUiEvent.OnFeedbackClick -> onNavigateEvent(ProfileNavigation.Feedback)
                 ProfileUiEvent.OnImportExportClick -> openWebsite(context, PASS_IMPORT)
+                ProfileUiEvent.OnImportKeepassClick -> onNavigateEvent(ProfileNavigation.Import)
                 ProfileUiEvent.OnRateAppClick -> openWebsite(context, state.passStoreUrl)
                 ProfileUiEvent.OnSettingsClick -> onNavigateEvent(ProfileNavigation.Settings)
                 ProfileUiEvent.OnTellAFriendClick ->

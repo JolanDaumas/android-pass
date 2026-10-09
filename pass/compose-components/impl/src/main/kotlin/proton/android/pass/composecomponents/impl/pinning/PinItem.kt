@@ -21,6 +21,7 @@ package proton.android.pass.composecomponents.impl.pinning
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
@@ -56,7 +57,8 @@ fun PinItem(
     modifier: Modifier = Modifier,
     item: ItemUiModel,
     canLoadExternalImages: Boolean,
-    onItemClick: (ItemUiModel) -> Unit
+    onItemClick: (ItemUiModel) -> Unit,
+    content: (@Composable RowScope.() -> Unit)? = null
 ) {
     val pinBackgroundColor = when (item.contents) {
         is ItemContents.Note -> PassTheme.colors.noteInteractionNormMinor1
@@ -125,10 +127,14 @@ fun PinItem(
 
             is ItemContents.Unknown -> Unit
         }
-        Text(
-            text = item.contents.title.ellipsize(TEXT_MAX_LENGTH_BEFORE_ELLIPSE),
-            style = ProtonTheme.typography.captionStrongNorm
-        )
+        if (content == null) {
+            Text(
+                text = item.contents.title.ellipsize(TEXT_MAX_LENGTH_BEFORE_ELLIPSE),
+                style = ProtonTheme.typography.captionStrongNorm
+            )
+        } else {
+            content()
+        }
     }
 }
 

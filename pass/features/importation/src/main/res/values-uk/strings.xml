@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="importation_title">Імпорт</string>
+    <string name="importation_file_label">Файл</string>
+    <string name="importation_file_placeholder">Виберіть файл</string>
+    <string name="importation_master_password_label">Головний пароль</string>
+    <string name="importation_master_password_placeholder">Введіть головний пароль</string>
+    <string name="importation_next_button">Далі</string>
+    <string name="importation_action_conceal_password">Приховати пароль</string>
+    <string name="importation_action_reveal_password">Показати пароль</string>
+    <string name="importation_selection_title">Items</string>
+    <string name="importation_confirm_button">Імпортувати</string>
+    <string name="importation_error_generic">Не вдалося імпортувати</string>
+</resources>
