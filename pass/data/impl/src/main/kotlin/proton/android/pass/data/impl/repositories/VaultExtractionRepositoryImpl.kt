@@ -37,7 +37,7 @@ import java.net.URI
 import javax.inject.Inject
 
 class VaultExtractionRepositoryImpl @Inject constructor(
-    private val openInputStream: (URI) -> InputStream?,
+    private val openInputStream: @JvmSuppressWildcards (URI) -> InputStream?,
     private val encryptionContextProvider: EncryptionContextProvider
 ) : VaultExtractionRepository {
     override suspend fun extractVault(uri: URI, masterPassword: String): Result<ExtractedVault> =
